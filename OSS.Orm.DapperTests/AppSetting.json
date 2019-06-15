@@ -1,0 +1,12 @@
+{
+  "AppConfig": {
+    "AppVersion": "1.0",
+    //  生成用户Token需要的 秘钥信息
+    "TokenSecret": "9d353259b8714a038c464059788d7r3b",
+    "AppDomain": "http://api.dev.com"
+  },
+  "ConnectionStrings": {
+    "WriteConnection": "server=13.67.112.156;database=oss_core;uid=osscore;pwd=asdvnkjsdf#$asdvav3;charset=utf8mb4",
+    "ReadeConnection": "server=13.67.112.156;database=oss_core;uid=osscore;pwd=asdvnkjsdf#$asdvav3;charset=utf8mb4"
+  }
+}
