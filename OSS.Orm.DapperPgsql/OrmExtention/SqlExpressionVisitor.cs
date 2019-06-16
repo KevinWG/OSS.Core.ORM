@@ -471,7 +471,7 @@ namespace OSS.Orm.DapperPgsql.OrmExtention
         /// <returns></returns>
         public virtual string GetColName(string name)
         {
-            return string.Concat('`', name, '`');
+            return name;
         }
 
 

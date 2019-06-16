@@ -178,10 +178,6 @@ namespace OSS.Orm.DapperMysql.OrmExtention
                 sql = string.Concat(" WHERE ", whereFlag.Sql);
             }
 
-#if DEBUG
-            if (!sql.Contains("t_id"))
-                throw new ArgumentNullException("租户值不能为空！");
-#endif
             return sql;
         }
 

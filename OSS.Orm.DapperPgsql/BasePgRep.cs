@@ -1,11 +1,11 @@
-﻿#region Copyright (C) 2017 Kevin (OSS开源实验室) 公众号：osscoder
+﻿#region Copyright (C) 2019 Kevin (OSS开源实验室) 公众号：osscore
 
 /***************************************************************************
 *　　	文件功能描述：OSSCore仓储层 —— 仓储基类
 *
 *　　	创建人： Kevin
 *       创建人Email：1985088337@qq.com
-*    	创建日期：2017-4-21
+*    	创建日期：2019-6-15
 *       
 *****************************************************************************/
 
@@ -18,18 +18,18 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Dapper;
-using MySql.Data.MySqlClient;
+using Npgsql;
 using OSS.Common.ComModels;
 using OSS.Common.ComModels.Enums;
 using OSS.Common.Plugs.LogPlug;
-using OSS.Orm.DapperMysql.OrmExtention;
+using OSS.Orm.DapperPgsql.OrmExtention;
 
-namespace OSS.Orm.DapperMysql
+namespace OSS.Orm.DapperPgsql
 {
     /// <summary>
     /// 仓储层基类
     /// </summary>
-    public class BaseRep<TRep,TType>
+    public class BasePgRep<TRep,TType>
         where TRep:class ,new()
         where TType:BaseMo,new()
     {
@@ -38,9 +38,9 @@ namespace OSS.Orm.DapperMysql
         private static string _writeConnectionString;
         private static string _readeConnectionString;
 
-        public BaseRep(string writeConnectionStr, string readeConnectionStr )
+        public BasePgRep(string writeConnectionStr, string readeConnectionStr )
         {
-            _writeConnectionString = writeConnectionStr ;
+            _writeConnectionString = writeConnectionStr;
             _readeConnectionString = readeConnectionStr;
         }
         
@@ -85,7 +85,7 @@ namespace OSS.Orm.DapperMysql
             try
             {
 
-                using (var con = new MySqlConnection(connecStr))
+                using (var con = new NpgsqlConnection(connecStr))
                 {
                     t = await func(con);
                 }
@@ -275,8 +275,7 @@ namespace OSS.Orm.DapperMysql
         }
 
         #endregion
-
-
+        
         #region 单例模块
 
         private static readonly object _lockObj = new object();

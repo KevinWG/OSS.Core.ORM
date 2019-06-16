@@ -1,11 +1,11 @@
-﻿#region Copyright (C) 2019 Kevin (OSS开源实验室) 公众号：osscore
+﻿#region Copyright (C) 2017 Kevin (OSS开源实验室) 公众号：osscoder
 
 /***************************************************************************
 *　　	文件功能描述：OSSCore仓储层 —— 仓储基类
 *
 *　　	创建人： Kevin
 *       创建人Email：1985088337@qq.com
-*    	创建日期：2019-6-15
+*    	创建日期：2017-4-21
 *       
 *****************************************************************************/
 
@@ -18,18 +18,18 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Dapper;
-using Npgsql;
+using MySql.Data.MySqlClient;
 using OSS.Common.ComModels;
 using OSS.Common.ComModels.Enums;
 using OSS.Common.Plugs.LogPlug;
-using OSS.Orm.DapperPgsql.OrmExtention;
+using OSS.Orm.DapperMysql.OrmExtention;
 
-namespace OSS.Orm.DapperPgsql
+namespace OSS.Orm.DapperMysql
 {
     /// <summary>
     /// 仓储层基类
     /// </summary>
-    public class BaseRep<TRep,TType>
+    public class BaseMysqlRep<TRep,TType>
         where TRep:class ,new()
         where TType:BaseMo,new()
     {
@@ -38,9 +38,9 @@ namespace OSS.Orm.DapperPgsql
         private static string _writeConnectionString;
         private static string _readeConnectionString;
 
-        public BaseRep(string writeConnectionStr, string readeConnectionStr )
+        public BaseMysqlRep(string writeConnectionStr, string readeConnectionStr )
         {
-            _writeConnectionString = writeConnectionStr;
+            _writeConnectionString = writeConnectionStr ;
             _readeConnectionString = readeConnectionStr;
         }
         
@@ -85,7 +85,7 @@ namespace OSS.Orm.DapperPgsql
             try
             {
 
-                using (var con = new NpgsqlConnection(connecStr))
+                using (var con = new MySqlConnection(connecStr))
                 {
                     t = await func(con);
                 }

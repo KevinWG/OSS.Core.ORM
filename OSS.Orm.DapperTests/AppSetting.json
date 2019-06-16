@@ -1,12 +1,6 @@
 {
-  "AppConfig": {
-    "AppVersion": "1.0",
-    //  生成用户Token需要的 秘钥信息
-    "TokenSecret": "9d353259b8714a038c464059788d7r3b",
-    "AppDomain": "http://api.dev.com"
-  },
   "ConnectionStrings": {
-    "WriteConnection": "",
-    "ReadeConnection": ""
+    "WriteConnection": "Host=117.48.228.143;Username=postgres;Password=admin20190610;Database=test_db",
+    "ReadeConnection": "Host=117.48.228.143;Username=postgres;Password=admin20190610;Database=test_db"
   }
 }

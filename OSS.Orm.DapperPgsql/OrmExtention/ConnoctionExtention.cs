@@ -16,12 +16,10 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Dapper;
 using OSS.Common.ComModels;
-using OSS.Common.Extention.DTO;
 
 namespace OSS.Orm.DapperPgsql.OrmExtention
 {
@@ -35,7 +33,7 @@ namespace OSS.Orm.DapperPgsql.OrmExtention
             if (string.IsNullOrEmpty(tableName))
                 tableName = mo.GetType().Name;
 
-            var sql = GetInserSql<TType>(tableName, false);
+            var sql = GetInserSql<TType>(tableName);
 
             long id = await con.ExecuteAsync(sql, mo);
 
@@ -46,18 +44,18 @@ namespace OSS.Orm.DapperPgsql.OrmExtention
             return id > 0 ? new ResultIdMo(resId) : new ResultIdMo(ResultTypes.AddFail, "添加操作失败！");
         }
 
-        public static async Task<ResultIdMo> InsertAuto<TType>(this IDbConnection con, string tableName, TType mo)
-        {
-            if (string.IsNullOrEmpty(tableName))
-                tableName = mo.GetType().Name;
+        //public static async Task<ResultIdMo> InsertAuto<TType>(this IDbConnection con, string tableName, TType mo)
+        //{
+        //    if (string.IsNullOrEmpty(tableName))
+        //        tableName = mo.GetType().Name;
           
-            var sql = GetInserSql<TType>(tableName, true);
-            var id = await con.ExecuteScalarAsync<long>(sql, mo);
+        //    var sql = GetInserSql<TType>(tableName,true);
+        //    var id = await con.ExecuteScalarAsync<long>(sql, mo);
 
-            return id > 0 ? new ResultIdMo(id.ToString()) : new ResultIdMo(ResultTypes.AddFail, "添加操作失败！");
-        }
+        //    return id > 0 ? new ResultIdMo(id.ToString()) : new ResultIdMo(ResultTypes.AddFail, "添加操作失败！");
+        //}
 
-        private static string GetInserSql<TType>(string tableName,  bool haveAuto)
+        private static string GetInserSql<TType>(string tableName)
         {
             //  todo 未来针对类型，添加语句缓存
             var properties = typeof(TType).GetProperties();
@@ -70,14 +68,14 @@ namespace OSS.Orm.DapperPgsql.OrmExtention
 
             foreach (var propertyInfo in properties)
             {
-                if (haveAuto)
-                {
-                    var isAuto = propertyInfo.GetCustomAttribute<AutoColumnAttribute>() != null;
-                    if (isAuto)
-                    {
-                        continue;
-                    }
-                }
+                //if (haveAuto)
+                //{
+                //    var isAuto = propertyInfo.GetCustomAttribute<AutoColumnAttribute>() != null;
+                //    if (isAuto)
+                //    {
+                //        continue;
+                //    }
+                //}
 
                 if (isStart)
                 {
@@ -86,15 +84,14 @@ namespace OSS.Orm.DapperPgsql.OrmExtention
                 }
                 else
                     isStart = true;
-                sqlCols.Append("`").Append(propertyInfo.Name).Append("`");
+
+                sqlCols.Append(propertyInfo.Name);
                 sqlValues.Append("@").Append(propertyInfo.Name);
             }
             sqlCols.Append(")");
             sqlValues.Append(")");
             sqlCols.Append(sqlValues);
-
-            if (haveAuto)
-                sqlCols.Append(";SELECT LAST_INSERT_ID();");
+            
             return sqlCols.ToString();
         }
         #endregion
@@ -178,10 +175,6 @@ namespace OSS.Orm.DapperPgsql.OrmExtention
                 sql = string.Concat(" WHERE ", whereFlag.Sql);
             }
 
-#if DEBUG
-            if (!sql.Contains("t_id"))
-                throw new ArgumentNullException("租户值不能为空！");
-#endif
             return sql;
         }
 
