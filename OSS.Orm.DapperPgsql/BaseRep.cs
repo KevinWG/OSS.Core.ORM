@@ -40,8 +40,8 @@ namespace OSS.Orm.DapperPgsql
 
         public BaseRep(string writeConnectionStr, string readeConnectionStr )
         {
-            _writeConnectionString = writeConnectionStr?? "Host=117.48.228.143;Username=postgres;Password=admin20190610;Database=test_db";
-            _readeConnectionString = readeConnectionStr?? "Host=117.48.228.143;Username=postgres;Password=admin20190610;Database=test_db";
+            _writeConnectionString = writeConnectionStr;
+            _readeConnectionString = readeConnectionStr;
         }
         
 
