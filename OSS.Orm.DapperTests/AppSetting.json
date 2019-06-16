@@ -1,6 +1,0 @@
-{
-  "ConnectionStrings": {
-    "WriteConnection": "Host=117.48.228.143;Username=postgres;Password=admin20190610;Database=test_db",
-    "ReadeConnection": "Host=117.48.228.143;Username=postgres;Password=admin20190610;Database=test_db"
-  }
-}
