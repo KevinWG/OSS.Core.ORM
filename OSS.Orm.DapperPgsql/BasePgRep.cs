@@ -54,7 +54,7 @@ namespace OSS.Orm.DapperPgsql
         /// <param name="func"></param>
         /// <returns></returns>
         protected internal static Task<RType> ExcuteWriteAsync<RType>(Func<IDbConnection, Task<RType>> func) where RType : ResultMo, new()
-            => Execute(func, _writeConnectionString);
+            => Execute(func, true);
 
         /// <summary>
         ///  执行读操作，返回具体类型，自动包装成ResultMo结果实体
@@ -66,7 +66,7 @@ namespace OSS.Orm.DapperPgsql
         {
             var res =await func(con);
             return res != null ? new ResultMo<RType>(res) : new ResultMo<RType>(ResultTypes.ObjectNull, "未发现相关数据！");
-        }, _readeConnectionString);
+        }, false);
 
         /// <summary>
         /// 执行读操作，直接返回继承自ResultMo实体
@@ -75,17 +75,16 @@ namespace OSS.Orm.DapperPgsql
         /// <param name="func"></param>
         /// <returns></returns>
         protected internal static async Task<RType> ExcuteReadeResAsync<RType>(Func<IDbConnection, Task<RType>> func) where RType : ResultMo, new()
-            =>await Execute(func, _readeConnectionString);
+            =>await Execute(func, false);
 
-        private static async Task<RType> Execute<RType>(Func<IDbConnection, Task<RType>> func, string connecStr)
+        private static async Task<RType> Execute<RType>(Func<IDbConnection, Task<RType>> func, bool isWrite)
             where RType : ResultMo, new()
         {
             RType t;
 
             try
             {
-
-                using (var con = new NpgsqlConnection(connecStr))
+                using (var con = new NpgsqlConnection(isWrite?_writeConnectionString:_readeConnectionString))
                 {
                     t = await func(con);
                 }
@@ -94,11 +93,11 @@ namespace OSS.Orm.DapperPgsql
             catch (Exception e)
             {
                 LogUtil.Error(string.Concat("数据库操作错误，详情：", e.Message, "\r\n", e.StackTrace), "DataRepConnectionError",
-                    "DapperRep");
+                    "DapperRep_PG");
                 t = new RType
                 {
                     ret = (int) ResultTypes.InnerError,
-                    msg = "数据更新出错！"
+                    msg = isWrite?"数据操作出错！":"数据读取出错！"
                 };
             }
             return t ?? new RType() {ret = (int) ResultTypes.ObjectNull, msg = "未发现对应结果"};
@@ -120,8 +119,10 @@ namespace OSS.Orm.DapperPgsql
         /// <summary>
         /// 部分字段的更新
         /// </summary>
-        ///  <param name="updateExp">更新字段new{m.Name,....} Or new{ Name="",....}</param>
-        /// <param name="whereExp">判断条件，如果为空默认根据Id判断</param>
+        ///  <param name="updateExp">更新字段,示例：
+        ///  u=>new{mo.Name,....} Or u=> new{ Name="",....}</param>
+        /// <param name="whereExp">判断条件 示例：
+        /// w=>w.id==1  , 如果为空默认根据Id判断</param>
         /// <param name="mo"></param>
         /// <returns></returns>
         protected static Task<ResultMo> Update(Expression<Func<TType, object>> updateExp,
