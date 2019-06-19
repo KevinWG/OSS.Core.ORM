@@ -40,14 +40,14 @@ namespace OSS.Orm.DapperTests
     }
 
 
-    public class UserInfo:BaseMo
+    public class UserInfo:BaseMo<string>
     {
         public string user_name { get; set; }
 
     }
 
 
-    public class UserInfoRep : BasePgRep<UserInfoRep, UserInfo>
+    public class UserInfoRep : BasePgRep<UserInfoRep, UserInfo,string>
     {
         private static readonly string connectStr = "";
 

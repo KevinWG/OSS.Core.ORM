@@ -27,33 +27,16 @@ namespace OSS.Orm.DapperPgsql.OrmExtention
     {
         #region    插入扩展
 
-        public static async Task<ResultIdMo> Insert<TType>(this IDbConnection con, string tableName, TType mo)
-            where TType : BaseMo
+        public static Task<int> Insert<TType>(this IDbConnection con, string tableName, TType mo)
+
         {
             if (string.IsNullOrEmpty(tableName))
                 tableName = mo.GetType().Name;
 
             var sql = GetInserSql<TType>(tableName);
 
-            long id = await con.ExecuteAsync(sql, mo);
-
-            var resId = string.Empty;
-            if (id > 0)
-                resId = mo.id;
-
-            return id > 0 ? new ResultIdMo(resId) : new ResultIdMo(ResultTypes.AddFail, "添加操作失败！");
+            return con.ExecuteAsync(sql, mo);
         }
-
-        //public static async Task<ResultIdMo> InsertAuto<TType>(this IDbConnection con, string tableName, TType mo)
-        //{
-        //    if (string.IsNullOrEmpty(tableName))
-        //        tableName = mo.GetType().Name;
-          
-        //    var sql = GetInserSql<TType>(tableName,true);
-        //    var id = await con.ExecuteScalarAsync<long>(sql, mo);
-
-        //    return id > 0 ? new ResultIdMo(id.ToString()) : new ResultIdMo(ResultTypes.AddFail, "添加操作失败！");
-        //}
 
         private static string GetInserSql<TType>(string tableName)
         {
@@ -98,7 +81,7 @@ namespace OSS.Orm.DapperPgsql.OrmExtention
 
         internal static async Task<ResultMo> UpdatePartail<TType>(this IDbConnection con, string tableName,
             Expression<Func<TType, object>> update, Expression<Func<TType, bool>> where, object mo)
-            where TType : BaseMo
+            //where TType : BaseMo
         {
             if (string.IsNullOrEmpty(tableName))
                 tableName = typeof(TType).Name;

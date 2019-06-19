@@ -29,9 +29,9 @@ namespace OSS.Orm.DapperMysql
     /// <summary>
     /// 仓储层基类
     /// </summary>
-    public class BaseMysqlRep<TRep,TType>
+    public class BaseMysqlRep<TRep,TType, IdType>
         where TRep:class ,new()
-        where TType:BaseMo,new()
+        where TType:BaseMo<IdType>,new()
     {
         protected static string m_TableName;
 
@@ -107,14 +107,25 @@ namespace OSS.Orm.DapperMysql
         #endregion
 
         #region 基础CRUD 表达式扩展
-        
+
         /// <summary>
         ///   插入数据
         /// </summary>
         /// <param name="mo"></param>
         /// <returns></returns>
-        public Task<ResultIdMo> Add(TType mo)
-            => ExcuteWriteAsync(con => con.Insert(m_TableName, mo));
+        public async Task<ResultIdMo<IdType>> Add(TType mo)
+        {
+            var res = await ExcuteWriteAsync(async con =>
+            {
+                var row = await con.Insert(m_TableName, mo);
+                return row > 0 ? new ResultIdMo<IdType>() : new ResultIdMo<IdType>(ResultTypes.OperateFailed, "添加失败!");
+            });
+            if (res.IsSuccess())
+            {
+                res.id = mo.id;
+            }
+            return res;
+        }
 
 
         /// <summary>
