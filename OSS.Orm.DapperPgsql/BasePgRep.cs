@@ -84,7 +84,11 @@ namespace OSS.Orm.DapperPgsql
 
             try
             {
-                using (var con = new NpgsqlConnection(isWrite?_writeConnectionString:_readeConnectionString))
+                if (DbConnector==null)
+                {
+                    DbConnector = GetDefaultConnection;
+                }
+                using (var con = DbConnector.Invoke(isWrite))
                 {
                     t = await func(con);
                 }
@@ -102,6 +106,13 @@ namespace OSS.Orm.DapperPgsql
             }
             return t ?? new RType() {ret = (int) ResultTypes.ObjectNull, msg = "未发现对应结果"};
         }
+        
+        private static IDbConnection GetDefaultConnection(bool isWrite)
+        {
+            return new NpgsqlConnection(isWrite ? _writeConnectionString : _readeConnectionString);
+        }
+
+        protected static Func<bool, IDbConnection> DbConnector { get; set; }
 
         #endregion
 
