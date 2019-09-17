@@ -16,39 +16,29 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Dapper;
 using OSS.Common.ComModels;
-using OSS.Common.Extention.DTO;
 
-namespace OSS.Orm.DapperMysql.OrmExtention
+namespace OSS.Orm.DapperPgsql.OrmExtention
 {
     internal static class ConnoctionExtention 
     {
         #region    插入扩展
 
-        public static  Task<int> Insert<TType>(this IDbConnection con, string tableName, TType mo)
-           // where TType : BaseMo
+        public static Task<int> Insert<TType>(this IDbConnection con, string tableName, TType mo)
+
         {
             if (string.IsNullOrEmpty(tableName))
                 tableName = mo.GetType().Name;
 
-            var sql = GetInserSql<TType>(tableName, false);
+            var sql = GetInserSql<TType>(tableName);
 
-             return con.ExecuteAsync(sql, mo);
-
-            //var resId = string.Empty;
-            //if (id > 0)
-            //    resId = mo.id;
-
-            //return id > 0 ? new ResultMo() : new ResultMo(ResultTypes.AddFail, "添加操作失败！");
+            return con.ExecuteAsync(sql, mo);
         }
 
-    
-
-        private static string GetInserSql<TType>(string tableName,  bool haveAuto)
+        private static string GetInserSql<TType>(string tableName)
         {
             //  todo 未来针对类型，添加语句缓存
             var properties = typeof(TType).GetProperties();
@@ -61,14 +51,14 @@ namespace OSS.Orm.DapperMysql.OrmExtention
 
             foreach (var propertyInfo in properties)
             {
-                if (haveAuto)
-                {
-                    var isAuto = propertyInfo.GetCustomAttribute<AutoColumnAttribute>() != null;
-                    if (isAuto)
-                    {
-                        continue;
-                    }
-                }
+                //if (haveAuto)
+                //{
+                //    var isAuto = propertyInfo.GetCustomAttribute<AutoColumnAttribute>() != null;
+                //    if (isAuto)
+                //    {
+                //        continue;
+                //    }
+                //}
 
                 if (isStart)
                 {
@@ -77,22 +67,21 @@ namespace OSS.Orm.DapperMysql.OrmExtention
                 }
                 else
                     isStart = true;
-                sqlCols.Append("`").Append(propertyInfo.Name).Append("`");
+
+                sqlCols.Append(propertyInfo.Name);
                 sqlValues.Append("@").Append(propertyInfo.Name);
             }
             sqlCols.Append(")");
             sqlValues.Append(")");
             sqlCols.Append(sqlValues);
-
-            if (haveAuto)
-                sqlCols.Append(";SELECT LAST_INSERT_ID();");
+            
             return sqlCols.ToString();
         }
         #endregion
 
         internal static async Task<ResultMo> UpdatePartail<TType>(this IDbConnection con, string tableName,
             Expression<Func<TType, object>> update, Expression<Func<TType, bool>> where, object mo)
-            //where TType : BaseMo<IdType>
+            //where TType : BaseMo
         {
             if (string.IsNullOrEmpty(tableName))
                 tableName = typeof(TType).Name;
@@ -105,7 +94,7 @@ namespace OSS.Orm.DapperMysql.OrmExtention
 
             var paras = GetExcuteParas(mo, visitor);
             var row = await con.ExecuteAsync(sql, paras);
-            return row > 0 ? new ResultMo() : new ResultMo(ResultTypes.OperateFailed, "更新失败!");
+            return row > 0 ? new ResultMo() : new ResultMo(ResultTypes.UpdateFail, "更新失败");
         }
         
         /// <summary>
