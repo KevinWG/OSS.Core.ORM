@@ -21,7 +21,6 @@ using Dapper;
 using Npgsql;
 using OSS.Common.ComModels;
 using OSS.Common.ComModels.Enums;
-using OSS.Common.Plugs.LogPlug;
 using OSS.Orm.DapperPgsql.OrmExtention;
 
 namespace OSS.Orm.DapperPgsql
@@ -36,12 +35,12 @@ namespace OSS.Orm.DapperPgsql
         protected static string m_TableName;
 
         private static string _writeConnectionString;
-        private static string _readeConnectionString;
+        private static string _readConnectionString;
 
-        public BasePgRep(string writeConnectionStr, string readeConnectionStr )
+        public BasePgRep(string writeConnectionStr, string readConnectionStr )
         {
             _writeConnectionString = writeConnectionStr;
-            _readeConnectionString = readeConnectionStr;
+            _readConnectionString = readConnectionStr;
         }
         
 
@@ -62,10 +61,10 @@ namespace OSS.Orm.DapperPgsql
         /// <typeparam name="RType"></typeparam>
         /// <param name="func"></param>
         /// <returns></returns>
-        protected internal static  Task<ResultMo<RType>> ExcuteReadeAsync<RType>(Func<IDbConnection, Task<RType>> func) => Execute(async con =>
+        protected internal static  Task<ResultMo<RType>> ExecuteReadeAsync<RType>(Func<IDbConnection, Task<RType>> func) => Execute(async con =>
         {
             var res =await func(con);
-            return res != null ? new ResultMo<RType>(res) : new ResultMo<RType>(ResultTypes.ObjectNull, "未发现相关数据！");
+            return res != null ? new ResultMo<RType>(res) : new ResultMo<RType>().WithResult(ResultTypes.ObjectNull, "未发现相关数据！");
         }, false);
 
         /// <summary>
@@ -74,7 +73,7 @@ namespace OSS.Orm.DapperPgsql
         /// <typeparam name="RType"></typeparam>
         /// <param name="func"></param>
         /// <returns></returns>
-        protected internal static async Task<RType> ExcuteReadeResAsync<RType>(Func<IDbConnection, Task<RType>> func) where RType : ResultMo, new()
+        protected internal static async Task<RType> ExecuteReadeResAsync<RType>(Func<IDbConnection, Task<RType>> func) where RType : ResultMo, new()
             =>await Execute(func, false);
 
         private static async Task<RType> Execute<RType>(Func<IDbConnection, Task<RType>> func, bool isWrite)
@@ -96,7 +95,7 @@ namespace OSS.Orm.DapperPgsql
             }
             catch (Exception e)
             {
-                LogUtil.Error(string.Concat("数据库操作错误，详情：", e.Message, "\r\n", e.StackTrace), "DataRepConnectionError",
+                _ = OSS.Tools.Log.LogUtil.Error(string.Concat("数据库操作错误，详情：", e.Message, "\r\n", e.StackTrace), "DataRepConnectionError",
                     "DapperRep_PG");
                 t = new RType
                 {
@@ -109,7 +108,7 @@ namespace OSS.Orm.DapperPgsql
         
         private static IDbConnection GetDefaultConnection(bool isWrite)
         {
-            return new NpgsqlConnection(isWrite ? _writeConnectionString : _readeConnectionString);
+            return new NpgsqlConnection(isWrite ? _writeConnectionString : _readConnectionString);
         }
 
         protected static Func<bool, IDbConnection> DbConnector { get; set; }
@@ -128,7 +127,8 @@ namespace OSS.Orm.DapperPgsql
             var res = await ExcuteWriteAsync(async con =>
             {
                 var row = await con.Insert(m_TableName, mo);
-                return row > 0 ? new ResultIdMo<IdType>() : new ResultIdMo<IdType>(ResultTypes.OperateFailed, "添加失败!");
+                return row > 0 ? new ResultIdMo<IdType>() 
+                    : new ResultIdMo<IdType>().WithResult(ResultTypes.OperateFailed, "添加失败!");
             });
             if (res.IsSuccess())
             {
@@ -149,7 +149,7 @@ namespace OSS.Orm.DapperPgsql
         /// <returns></returns>
         protected static Task<ResultMo> Update(Expression<Func<TType, object>> updateExp,
             Expression<Func<TType, bool>> whereExp, object mo = null)
-            => ExcuteWriteAsync(con => con.UpdatePartail(m_TableName, updateExp, whereExp, mo));
+            => ExcuteWriteAsync(con => con.UpdatePartial(m_TableName, updateExp, whereExp, mo));
 
 
         /// <summary>
@@ -158,7 +158,7 @@ namespace OSS.Orm.DapperPgsql
         /// <param name="whereExp">判断条件，如果为空默认根据Id判断</param>
         /// <returns></returns>
         protected static Task<ResultMo<TType>> Get(Expression<Func<TType, bool>> whereExp)
-            => ExcuteReadeAsync(con => con.Get(m_TableName, whereExp));
+            => ExecuteReadeAsync(con => con.Get(m_TableName, whereExp));
 
 
         /// <summary>
@@ -167,7 +167,7 @@ namespace OSS.Orm.DapperPgsql
         /// <param name="whereExp"></param>
         /// <returns></returns>
         protected static Task<ResultMo<IList<TType>>> GetList(Expression<Func<TType, bool>> whereExp)
-            => ExcuteReadeAsync(con => con.GetList(m_TableName, whereExp));
+            => ExecuteReadeAsync(con => con.GetList(m_TableName, whereExp));
 
 
         /// <summary>
@@ -196,7 +196,7 @@ namespace OSS.Orm.DapperPgsql
             {
                 var sql = string.Concat("UPDATE ", m_TableName, " SET ", updateSql, whereSql);
                 var row = await con.ExecuteAsync(sql, para);
-                return row > 0 ? new ResultMo() : new ResultMo(ResultTypes.UpdateFail, "更新失败");
+                return row > 0 ? new ResultMo() : new ResultMo().WithResult(ResultTypes.OperateFailed, "更新失败");
             });
 
 
@@ -210,13 +210,12 @@ namespace OSS.Orm.DapperPgsql
         protected virtual Task<ResultMo<TType>> Get(string whereSql, object para)
         {
             string sql = string.Concat("select * from ", m_TableName," ", whereSql);
-            return ExcuteReadeAsync(con => con.QuerySingleOrDefaultAsync<TType>(sql, para));
+            return ExecuteReadeAsync(con => con.QuerySingleOrDefaultAsync<TType>(sql, para));
         }
 
 
         /// <summary>
         /// 通过id获取实体
-        /// 此方法因为使用广泛，不添加tenantid条件
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
@@ -231,37 +230,41 @@ namespace OSS.Orm.DapperPgsql
         /// <summary>
         ///   列表查询
         /// </summary>
-        /// <param name="getsql">查询语句</param>
+        /// <param name="getSql">查询语句</param>
         /// <param name="paras">参数内容</param>
         /// <returns></returns>
-        protected virtual async Task<ResultListMo<TType>> GetList(string getsql,
+        protected virtual async Task<ResultListMo<TType>> GetList(string getSql,
             object paras)
         {
-            return await ExcuteReadeResAsync(async con =>
+            return await ExecuteReadeResAsync(async con =>
             {
-                var list = (await con.QueryAsync<TType>(getsql, paras))?.ToList();
+                var list = (await con.QueryAsync<TType>(getSql, paras))?.ToList();
 
                 return list?.Count > 0
                     ? new ResultListMo<TType>(list)
-                    : new ResultListMo<TType>(ResultTypes.ObjectNull, "没有查到相关信息！");
+                    : new ResultListMo<TType>().WithResult(ResultTypes.ObjectNull, "没有查到相关信息！");
             });
         }
-        
+
         /// <summary>
         ///   列表查询
         /// </summary>
         /// <param name="selectSql">查询语句，包含排序等</param>
-        /// <param name="totalSql">查询数量语句，不需要排序</param>
+        /// <param name="totalSql">查询数量语句，不需要排序,如果为空，则不计算和返回总数信息</param>
         /// <param name="paras">参数内容</param>
         /// <returns></returns>
-        protected virtual async Task<PageListMo<TType>> GetPageList(string selectSql, string totalSql,
-            object paras)
+        protected virtual async Task<PageListMo<TType>> GetPageList(string selectSql,object paras, string totalSql=null)
         {
-            return await ExcuteReadeResAsync(async con =>
+            return await ExecuteReadeResAsync(async con =>
             {
-                var total = await con.ExecuteScalarAsync<long>(totalSql, paras);
-                if (total <= 0) return new PageListMo<TType>(ResultTypes.ObjectNull, "没有查到相关信息！");
+                long total=0;
 
+                if (!string.IsNullOrEmpty(totalSql))
+                {
+                    total = await con.ExecuteScalarAsync<long>(totalSql, paras);
+                    if (total <= 0) return new PageListMo<TType>().WithResult(ResultTypes.ObjectNull, "没有查到相关信息！");
+                }
+             
                 var list = await con.QueryAsync<TType>(selectSql, paras);
                 return new PageListMo<TType>(total, list.ToList());
             });
@@ -293,7 +296,7 @@ namespace OSS.Orm.DapperPgsql
             return ExcuteWriteAsync(async con =>
             {
                 var rows = await con.ExecuteAsync(sql, paras);
-                return rows > 0 ? new ResultMo() : new ResultMo(ResultTypes.UpdateFail, "soft delete Failed!");
+                return rows > 0 ? new ResultMo() : new ResultMo().WithResult(ResultTypes.OperateFailed, "soft delete Failed!");
             });
         }
 

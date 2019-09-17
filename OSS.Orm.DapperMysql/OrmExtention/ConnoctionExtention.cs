@@ -90,7 +90,7 @@ namespace OSS.Orm.DapperMysql.OrmExtention
         }
         #endregion
 
-        internal static async Task<ResultMo> UpdatePartail<TType>(this IDbConnection con, string tableName,
+        internal static async Task<ResultMo> UpdatePartial<TType>(this IDbConnection con, string tableName,
             Expression<Func<TType, object>> update, Expression<Func<TType, bool>> where, object mo)
             //where TType : BaseMo<IdType>
         {
@@ -105,7 +105,7 @@ namespace OSS.Orm.DapperMysql.OrmExtention
 
             var paras = GetExcuteParas(mo, visitor);
             var row = await con.ExecuteAsync(sql, paras);
-            return row > 0 ? new ResultMo() : new ResultMo(ResultTypes.OperateFailed, "更新失败!");
+            return row > 0 ? new ResultMo() : new ResultMo().WithResult(ResultTypes.OperateFailed, "更新失败!");
         }
         
         /// <summary>
@@ -156,7 +156,7 @@ namespace OSS.Orm.DapperMysql.OrmExtention
             {
                 var updateFlag = new SqlVistorFlag(SqlVistorType.Update);
                 visitor.Visit(exp, updateFlag);
-                return updateFlag.Sql;
+                return updateFlag.sql;
             }
 
             string sql;
@@ -166,7 +166,7 @@ namespace OSS.Orm.DapperMysql.OrmExtention
             {
                 var whereFlag = new SqlVistorFlag(SqlVistorType.Where);
                 visitor.Visit(exp, whereFlag);
-                sql = string.Concat(" WHERE ", whereFlag.Sql);
+                sql = string.Concat(" WHERE ", whereFlag.sql);
             }
 
             return sql;
@@ -174,11 +174,11 @@ namespace OSS.Orm.DapperMysql.OrmExtention
 
         private static object GetExcuteParas(object mo, SqlExpressionVisitor visitor)
         {
-            if (!visitor.Parameters.Any())
+            if (!visitor.parameters.Any())
                 return mo;
 
-            var paras = new DynamicParameters(visitor.Parameters);
-            if (mo == null || !visitor.Properties.Any())
+            var paras = new DynamicParameters(visitor.parameters);
+            if (mo == null || !visitor.properties.Any())
                 return paras;
 
             paras.AddDynamicParams(mo);

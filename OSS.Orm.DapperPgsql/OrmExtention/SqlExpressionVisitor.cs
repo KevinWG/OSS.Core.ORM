@@ -24,17 +24,17 @@ namespace OSS.Orm.DapperPgsql.OrmExtention
         /// <summary>
         ///   表达式中的常量参数列表
         /// </summary>
-        public Dictionary<string, object> Parameters { get; }
+        public Dictionary<string, object> parameters { get; }
 
         /// <summary>
         ///  表达式中的属性名称列表
         /// </summary>
-        public Dictionary<string, string> Properties { get; }
+        public Dictionary<string, string> properties { get; }
 
         public SqlExpressionVisitor()
         {
-            Parameters = new Dictionary<string, object>();
-            Properties = new Dictionary<string, string>();
+            parameters = new Dictionary<string, object>();
+            properties = new Dictionary<string, string>();
         }
 
 
@@ -120,10 +120,10 @@ namespace OSS.Orm.DapperPgsql.OrmExtention
         /// <param name="flag"></param>
         protected virtual void VisitRight(Expression exp, SqlVistorFlag flag)
         {
-            var isRight = flag.IsRight;
-            flag.IsRight = true;
+            var isRight = flag.is_right;
+            flag.is_right = true;
             Visit(exp, flag);
-            flag.IsRight = isRight; //  回归
+            flag.is_right = isRight; //  回归
         }
 
         #region   不同表达式解析方法
@@ -146,7 +146,7 @@ namespace OSS.Orm.DapperPgsql.OrmExtention
         private void MethodCallLike(MethodCallExpression exp, SqlVistorFlag flag)
         {
             Visit(exp.Object, flag);
-            flag.Append(GetUnaryOperater(flag.UnaryType));
+            flag.Append(GetUnaryOperater(flag.unary_type));
             flag.Append(" LIKE CONCAT('%',");
             VisitRight(exp.Arguments[0], flag);
             flag.Append(",'%')");
@@ -197,9 +197,9 @@ namespace OSS.Orm.DapperPgsql.OrmExtention
         protected virtual void VisitConstant(ConstantExpression c, SqlVistorFlag flag)
         {
             var value = c.Value ?? "null";
-            if (flag.IsRight)
+            if (flag.is_right)
             {
-                var paraName = GetCustomParaName(flag.ParaPreToken); // flag.GetCustomParaName();
+                var paraName = GetCustomParaName(flag.para_preToken); // flag.GetCustomParaName();
                 flag.Append(paraName,true);
 
                 if (c.Type.IsEnum)
@@ -221,10 +221,10 @@ namespace OSS.Orm.DapperPgsql.OrmExtention
 
         protected virtual void VisitUnary(UnaryExpression u, SqlVistorFlag flag)
         {
-            var nodeType = flag.UnaryType;
-            flag.UnaryType = u.NodeType;
+            var nodeType = flag.unary_type;
+            flag.unary_type = u.NodeType;
             Visit(u.Operand, flag);
-            flag.UnaryType = nodeType;
+            flag.unary_type = nodeType;
         }
 
         protected virtual void VisitLambda(LambdaExpression lambda, SqlVistorFlag flag)
@@ -249,7 +249,7 @@ namespace OSS.Orm.DapperPgsql.OrmExtention
             if (exp.Expression != null
                 && exp.Expression.NodeType == ExpressionType.Parameter)
             {
-                if (flag.IsRight && flag.VistorType == SqlVistorType.Update)
+                if (flag.is_right && flag.vistor_type == SqlVistorType.Update)
                 {
                     var proParaName = flag.GetParaName(exp.Member.Name);
                     flag.Append(proParaName, true);
@@ -309,9 +309,9 @@ namespace OSS.Orm.DapperPgsql.OrmExtention
         /// <param name="pro"></param>
         private void AddMemberProperty(string name, string pro)
         {
-            if (!Properties.ContainsKey(name))
+            if (!properties.ContainsKey(name))
             {
-                Properties.Add(name, pro);
+                properties.Add(name, pro);
             }
         }
 
@@ -322,7 +322,7 @@ namespace OSS.Orm.DapperPgsql.OrmExtention
         /// <param name="value"></param>
         private void AddParameter(string paraName, object value)
         {
-            Parameters.Add(paraName, value);
+            parameters.Add(paraName, value);
         }
 
 
@@ -403,35 +403,35 @@ namespace OSS.Orm.DapperPgsql.OrmExtention
 
         public SqlVistorFlag(SqlVistorType vistorType)
         {
-            VistorType = vistorType;
+            vistor_type = vistorType;
             _sqlBuilder = new StringBuilder();
-            UnaryType = (ExpressionType)(-1);
+            unary_type = (ExpressionType)(-1);
         }
 
         /// <summary>
         ///   是否是表达式右侧项，决定右侧树是否做参数化处理
         /// </summary>
-        public bool IsRight { get; set; }
+        public bool is_right { get; set; }
 
         /// <summary>
         /// 主要是MethodCall方法中解析时需要知晓上层一元运算符
         /// </summary>
-        public ExpressionType UnaryType { get; set; }
+        public ExpressionType unary_type { get; set; }
 
         /// <summary>
         ///  参数辨识符号
         /// </summary>
-        public string ParaPreToken { get; } = "@";
+        public string para_preToken { get; } = "@";
 
         /// <summary>
         ///  对应的SQL语句
         /// </summary>
-        public string Sql => _sqlBuilder.ToString().TrimEnd(GetSeparate());
+        public string sql => _sqlBuilder.ToString().TrimEnd(GetSeparate());
 
         /// <summary>
         ///  解析语段类型
         /// </summary>
-        public SqlVistorType VistorType { get; set; }
+        public SqlVistorType vistor_type { get; set; }
 
         #region 语句拼接
 
@@ -459,7 +459,7 @@ namespace OSS.Orm.DapperPgsql.OrmExtention
         /// <returns></returns>
         public virtual string GetParaName(string name)
         {
-            return string.Concat(ParaPreToken, name);
+            return string.Concat(para_preToken, name);
         }
 
 
@@ -477,7 +477,7 @@ namespace OSS.Orm.DapperPgsql.OrmExtention
 
         private char GetSeparate()
         {
-            switch (VistorType)
+            switch (vistor_type)
             {
                 case SqlVistorType.Update:
                     return ',';
