@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using OSS.Common.ComModels;
 using OSS.Common.ComUtils;
 using OSS.Common.Extention;
+using OSS.Common.Resp;
 using OSS.Orm.DapperPgsql;
 using Xunit;
 
@@ -57,23 +58,23 @@ namespace OSS.Orm.DapperTests
         }
 
 
-        public async Task<ResultMo> UpdateName(string id, string name)
+        public async Task<Resp> UpdateName(string id, string name)
         {
             var teU=new UserInfo(){id=id,user_name = name};
             return await Update(u => new {teU.user_name}, u => u.id == id);
         }
-        //public async Task<ResultMo> UpdateName(string id, string name)
+        //public async Task<Resp> UpdateName(string id, string name)
         //{
         //    var teU = new UserInfo() { id = id, user_name = name };
         //    return await Update(u => new { teU.user_name }, u => u.id == id, teU);
         //}
-        public async Task<ResultMo> Get(string id)
+        public async Task<Resp> Get(string id)
         {
             return await Get(u => u.id == id);
         }
 
 
-        public async Task<ResultMo> GetList()
+        public async Task<Resp> GetList()
         {
             return await GetList(u => u.add_time>0);
         }

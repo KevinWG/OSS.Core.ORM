@@ -20,8 +20,8 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Dapper;
-using OSS.Common.ComModels;
 using OSS.Common.Extention.DTO;
+using OSS.Common.Resp;
 
 namespace OSS.Orm.DapperMysql.OrmExtention
 {
@@ -43,7 +43,7 @@ namespace OSS.Orm.DapperMysql.OrmExtention
             //if (id > 0)
             //    resId = mo.id;
 
-            //return id > 0 ? new ResultMo() : new ResultMo(ResultTypes.AddFail, "添加操作失败！");
+            //return id > 0 ? new Resp() : new Resp(RespTypes.AddFail, "添加操作失败！");
         }
 
     
@@ -90,7 +90,7 @@ namespace OSS.Orm.DapperMysql.OrmExtention
         }
         #endregion
 
-        internal static async Task<ResultMo> UpdatePartial<TType>(this IDbConnection con, string tableName,
+        internal static async Task<Resp> UpdatePartial<TType>(this IDbConnection con, string tableName,
             Expression<Func<TType, object>> update, Expression<Func<TType, bool>> where, object mo)
             //where TType : BaseMo<IdType>
         {
@@ -105,7 +105,7 @@ namespace OSS.Orm.DapperMysql.OrmExtention
 
             var paras = GetExcuteParas(mo, visitor);
             var row = await con.ExecuteAsync(sql, paras);
-            return row > 0 ? new ResultMo() : new ResultMo().WithResult(ResultTypes.OperateFailed, "更新失败!");
+            return row > 0 ? new Resp() : new Resp().WithResult(RespTypes.OperateFailed, "更新失败!");
         }
         
         /// <summary>

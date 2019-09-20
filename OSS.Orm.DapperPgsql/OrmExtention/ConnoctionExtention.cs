@@ -20,6 +20,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Dapper;
 using OSS.Common.ComModels;
+using OSS.Common.Resp;
 
 namespace OSS.Orm.DapperPgsql.OrmExtention
 {
@@ -79,7 +80,7 @@ namespace OSS.Orm.DapperPgsql.OrmExtention
         }
         #endregion
 
-        internal static async Task<ResultMo> UpdatePartial<TType>(this IDbConnection con, string tableName,
+        internal static async Task<Resp> UpdatePartial<TType>(this IDbConnection con, string tableName,
             Expression<Func<TType, object>> update, Expression<Func<TType, bool>> where, object mo)
             //where TType : BaseMo
         {
@@ -94,7 +95,7 @@ namespace OSS.Orm.DapperPgsql.OrmExtention
 
             var paras = GetExecuteParas(mo, visitor);
             var row = await con.ExecuteAsync(sql, paras);
-            return row > 0 ? new ResultMo() : new ResultMo().WithResult(ResultTypes.OperateFailed, "操作失败！");
+            return row > 0 ? new Resp() : new Resp().WithResult(RespTypes.OperateFailed, "操作失败！");
         }
         
         /// <summary>
