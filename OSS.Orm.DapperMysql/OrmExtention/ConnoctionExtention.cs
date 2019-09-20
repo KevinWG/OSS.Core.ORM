@@ -141,7 +141,7 @@ namespace OSS.Orm.DapperMysql.OrmExtention
             var paras = GetExcuteParas(null, sqlVisitor);
 
             var listRes = (await con.QueryAsync<TType>(sqlStr, paras)).ToList();
-            return listRes.Count == 0 ? null : listRes.ToList();
+            return listRes.Count == 0 ? null : listRes.ToList();// 没有返回空，上边处理
         }
 
         /// <summary>
