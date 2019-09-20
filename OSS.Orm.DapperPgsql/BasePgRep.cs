@@ -65,7 +65,7 @@ namespace OSS.Orm.DapperPgsql
         protected internal static  Task<Resp<RType>> ExecuteReadeAsync<RType>(Func<IDbConnection, Task<RType>> func) => Execute(async con =>
         {
             var res =await func(con);
-            return res != null ? new Resp<RType>(res) : new Resp<RType>().WithResult(RespTypes.ObjectNull, "未发现相关数据！");
+            return res != null ? new Resp<RType>(res) : new Resp<RType>().WithResp(RespTypes.ObjectNull, "未发现相关数据！");
         }, false);
 
         /// <summary>
@@ -129,7 +129,7 @@ namespace OSS.Orm.DapperPgsql
             {
                 var row = await con.Insert(m_TableName, mo);
                 return row > 0 ? new IdResp<IdType>() 
-                    : new IdResp<IdType>().WithResult(RespTypes.OperateFailed, "添加失败!");
+                    : new IdResp<IdType>().WithResp(RespTypes.OperateFailed, "添加失败!");
             });
             if (res.IsSuccess())
             {
@@ -197,7 +197,7 @@ namespace OSS.Orm.DapperPgsql
             {
                 var sql = string.Concat("UPDATE ", m_TableName, " SET ", updateSql, whereSql);
                 var row = await con.ExecuteAsync(sql, para);
-                return row > 0 ? new Resp() : new Resp().WithResult(RespTypes.OperateFailed, "更新失败");
+                return row > 0 ? new Resp() : new Resp().WithResp(RespTypes.OperateFailed, "更新失败");
             });
 
 
@@ -243,7 +243,7 @@ namespace OSS.Orm.DapperPgsql
 
                 return list?.Count > 0
                     ? new ListResp<TType>(list)
-                    : new ListResp<TType>().WithResult(RespTypes.ObjectNull, "没有查到相关信息！");
+                    : new ListResp<TType>().WithResp(RespTypes.ObjectNull, "没有查到相关信息！");
             });
         }
 
@@ -263,7 +263,7 @@ namespace OSS.Orm.DapperPgsql
                 if (!string.IsNullOrEmpty(totalSql))
                 {
                     total = await con.ExecuteScalarAsync<long>(totalSql, paras);
-                    if (total <= 0) return new PageListResp<TType>().WithResult(RespTypes.ObjectNull, "没有查到相关信息！");
+                    if (total <= 0) return new PageListResp<TType>().WithResp(RespTypes.ObjectNull, "没有查到相关信息！");
                 }
              
                 var list = await con.QueryAsync<TType>(selectSql, paras);
@@ -297,7 +297,7 @@ namespace OSS.Orm.DapperPgsql
             return ExecuteWriteAsync(async con =>
             {
                 var rows = await con.ExecuteAsync(sql, paras);
-                return rows > 0 ? new Resp() : new Resp().WithResult(RespTypes.OperateFailed, "soft delete Failed!");
+                return rows > 0 ? new Resp() : new Resp().WithResp(RespTypes.OperateFailed, "soft delete Failed!");
             });
         }
 

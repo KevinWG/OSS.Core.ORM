@@ -105,7 +105,7 @@ namespace OSS.Orm.DapperMysql.OrmExtention
 
             var paras = GetExcuteParas(mo, visitor);
             var row = await con.ExecuteAsync(sql, paras);
-            return row > 0 ? new Resp() : new Resp().WithResult(RespTypes.OperateFailed, "更新失败!");
+            return row > 0 ? new Resp() : new Resp().WithResp(RespTypes.OperateFailed, "更新失败!");
         }
         
         /// <summary>

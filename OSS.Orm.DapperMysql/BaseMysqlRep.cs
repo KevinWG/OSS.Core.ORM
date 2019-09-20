@@ -65,7 +65,7 @@ namespace OSS.Orm.DapperMysql
         protected internal static  Task<Resp<RType>> ExcuteReadeAsync<RType>(Func<IDbConnection, Task<RType>> func) => Execute(async con =>
         {
             var res =await func(con);
-            return res != null ? new Resp<RType>(res) : new Resp<RType>().WithResult(RespTypes.ObjectNull, "未发现相关数据！");
+            return res != null ? new Resp<RType>(res) : new Resp<RType>().WithResp(RespTypes.ObjectNull, "未发现相关数据！");
         }, false);
 
         /// <summary>
@@ -127,7 +127,7 @@ namespace OSS.Orm.DapperMysql
             var res = await ExcuteWriteAsync(async con =>
             {
                 var row = await con.Insert(m_TableName, mo);
-                return row > 0 ? new IdResp<IdType>() : new IdResp<IdType>().WithResult(RespTypes.OperateFailed, "添加失败!");
+                return row > 0 ? new IdResp<IdType>() : new IdResp<IdType>().WithResp(RespTypes.OperateFailed, "添加失败!");
             });
             if (res.IsSuccess())
             {
@@ -195,7 +195,7 @@ namespace OSS.Orm.DapperMysql
             {
                 var sql = string.Concat("UPDATE ", m_TableName, " SET ", updateSql, whereSql);
                 var row = await con.ExecuteAsync(sql, para);
-                return row > 0 ? new Resp() : new Resp().WithResult(ret: RespTypes.OperateFailed, "更新失败");
+                return row > 0 ? new Resp() : new Resp().WithResp(ret: RespTypes.OperateFailed, "更新失败");
             });
 
 
@@ -241,7 +241,7 @@ namespace OSS.Orm.DapperMysql
 
                 return list?.Count > 0
                     ? new ListResp<TType>(list)
-                    : new ListResp<TType>().WithResult(RespTypes.ObjectNull, "没有查到相关信息！");
+                    : new ListResp<TType>().WithResp(RespTypes.ObjectNull, "没有查到相关信息！");
             });
         }
         
@@ -261,7 +261,7 @@ namespace OSS.Orm.DapperMysql
                 if (!string.IsNullOrEmpty(totalSql))
                 {
                     total = await con.ExecuteScalarAsync<long>(totalSql, paras);
-                    if (total <= 0) return new PageListResp<TType>().WithResult(RespTypes.ObjectNull, "没有查到相关信息！");
+                    if (total <= 0) return new PageListResp<TType>().WithResp(RespTypes.ObjectNull, "没有查到相关信息！");
                 }
 
                 var list = await con.QueryAsync<TType>(selectSql, paras);
@@ -295,7 +295,7 @@ namespace OSS.Orm.DapperMysql
             return ExcuteWriteAsync(async con =>
             {
                 var rows = await con.ExecuteAsync(sql, paras);
-                return rows > 0 ? new Resp() : new Resp().WithResult(RespTypes.OperateFailed, "soft delete Failed!");
+                return rows > 0 ? new Resp() : new Resp().WithResp(RespTypes.OperateFailed, "soft delete Failed!");
             });
         }
 
