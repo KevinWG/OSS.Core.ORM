@@ -1,6 +1,6 @@
 using System;
 using System.Threading.Tasks;
-using OSS.Common.ComModels;
+using OSS.Common.BasicMos;
 using OSS.Common.ComUtils;
 using OSS.Common.Extention;
 using OSS.Common.Resp;

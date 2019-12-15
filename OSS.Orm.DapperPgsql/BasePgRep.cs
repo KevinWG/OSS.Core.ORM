@@ -19,10 +19,11 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Dapper;
 using Npgsql;
-using OSS.Common.ComModels;
-using OSS.Common.ComModels.Enums;
+using OSS.Common.BasicMos;
+using OSS.Common.BasicMos.Enums;
 using OSS.Common.Resp;
 using OSS.Orm.DapperPgsql.OrmExtention;
+using OSS.Tools.Log;
 
 namespace OSS.Orm.DapperPgsql
 {
@@ -96,7 +97,7 @@ namespace OSS.Orm.DapperPgsql
             }
             catch (Exception e)
             {
-                _ = OSS.Tools.Log.LogUtil.Error(string.Concat("数据库操作错误，详情：", e.Message, "\r\n", e.StackTrace), "DataRepConnectionError",
+                LogHelper.Error(string.Concat("数据库操作错误，详情：", e.Message, "\r\n", e.StackTrace), "DataRepConnectionError",
                     "DapperRep_PG");
                 t = new RType
                 {

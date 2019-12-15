@@ -16,11 +16,9 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Dapper;
-using OSS.Common.Extention.DTO;
 using OSS.Common.Resp;
 
 namespace OSS.Orm.DapperMysql.OrmExtention
@@ -35,7 +33,7 @@ namespace OSS.Orm.DapperMysql.OrmExtention
             if (string.IsNullOrEmpty(tableName))
                 tableName = mo.GetType().Name;
 
-            var sql = GetInserSql<TType>(tableName, false);
+            var sql = GetInserSql<TType>(tableName);
 
              return con.ExecuteAsync(sql, mo);
 
@@ -48,7 +46,7 @@ namespace OSS.Orm.DapperMysql.OrmExtention
 
     
 
-        private static string GetInserSql<TType>(string tableName,  bool haveAuto)
+        private static string GetInserSql<TType>(string tableName)
         {
             //  todo 未来针对类型，添加语句缓存
             var properties = typeof(TType).GetProperties();
@@ -61,14 +59,14 @@ namespace OSS.Orm.DapperMysql.OrmExtention
 
             foreach (var propertyInfo in properties)
             {
-                if (haveAuto)
-                {
-                    var isAuto = propertyInfo.GetCustomAttribute<AutoColumnAttribute>() != null;
-                    if (isAuto)
-                    {
-                        continue;
-                    }
-                }
+                //if (haveAuto)
+                //{
+                //    var isAuto = propertyInfo.GetCustomAttribute<AutoColumnAttribute>() != null;
+                //    if (isAuto)
+                //    {
+                //        continue;
+                //    }
+                //}
 
                 if (isStart)
                 {
@@ -84,8 +82,8 @@ namespace OSS.Orm.DapperMysql.OrmExtention
             sqlValues.Append(")");
             sqlCols.Append(sqlValues);
 
-            if (haveAuto)
-                sqlCols.Append(";SELECT LAST_INSERT_ID();");
+            //if (haveAuto)
+            //    sqlCols.Append(";SELECT LAST_INSERT_ID();");
             return sqlCols.ToString();
         }
         #endregion
