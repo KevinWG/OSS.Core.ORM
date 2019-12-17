@@ -97,7 +97,7 @@ namespace OSS.Orm.DapperPgsql
             }
             catch (Exception e)
             {
-                LogHelper.Error(string.Concat("数据库操作错误，详情：", e.Message, "\r\n", e.StackTrace), "DataRepConnectionError",
+                LogHelper.Error(string.Concat("数据库操作错误,仓储表名：",m_TableName,"，详情：", e.Message, "\r\n", e.StackTrace), "DataRepConnectionError",
                     "DapperRep_PG");
                 t = new RType
                 {

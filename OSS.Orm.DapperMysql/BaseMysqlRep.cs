@@ -54,7 +54,7 @@ namespace OSS.Orm.DapperMysql
         /// <typeparam name="RType"></typeparam>
         /// <param name="func"></param>
         /// <returns></returns>
-        protected internal static Task<RType> ExcuteWriteAsync<RType>(Func<IDbConnection, Task<RType>> func) where RType : Resp, new()
+        protected internal static Task<RType> ExecuteWriteAsync<RType>(Func<IDbConnection, Task<RType>> func) where RType : Resp, new()
             => Execute(func, true);
 
         /// <summary>
@@ -63,7 +63,7 @@ namespace OSS.Orm.DapperMysql
         /// <typeparam name="RType"></typeparam>
         /// <param name="func"></param>
         /// <returns></returns>
-        protected internal static  Task<Resp<RType>> ExcuteReadeAsync<RType>(Func<IDbConnection, Task<RType>> func) => Execute(async con =>
+        protected internal static  Task<Resp<RType>> ExecuteReadeAsync<RType>(Func<IDbConnection, Task<RType>> func) => Execute(async con =>
         {
             var res =await func(con);
             return res != null ? new Resp<RType>(res) : new Resp<RType>().WithResp(RespTypes.ObjectNull, "未发现相关数据！");
@@ -75,7 +75,7 @@ namespace OSS.Orm.DapperMysql
         /// <typeparam name="RType"></typeparam>
         /// <param name="func"></param>
         /// <returns></returns>
-        protected internal static async Task<RType> ExcuteReadeResAsync<RType>(Func<IDbConnection, Task<RType>> func) where RType : Resp, new()
+        protected internal static async Task<RType> ExecuteReadeResAsync<RType>(Func<IDbConnection, Task<RType>> func) where RType : Resp, new()
             =>await Execute(func, false);
 
         private static async Task<RType> Execute<RType>(Func<IDbConnection, Task<RType>> func, bool isWrite)
@@ -96,7 +96,7 @@ namespace OSS.Orm.DapperMysql
             }
             catch (Exception e)
             {
-                LogHelper.Error(string.Concat("数据库操作错误，详情：", e.Message, "\r\n", e.StackTrace), "DataRepConnectionError",
+                LogHelper.Error(string.Concat("数据库操作错误,仓储表名：", m_TableName, "，详情：", e.Message, "\r\n", e.StackTrace), "DataRepConnectionError",
                     "DapperRep_Mysql");
                 t = new RType
                 {
@@ -125,7 +125,7 @@ namespace OSS.Orm.DapperMysql
         /// <returns></returns>
         public async Task<IdResp<IdType>> Add(TType mo)
         {
-            var res = await ExcuteWriteAsync(async con =>
+            var res = await ExecuteWriteAsync(async con =>
             {
                 var row = await con.Insert(m_TableName, mo);
                 return row > 0 ? new IdResp<IdType>() : new IdResp<IdType>().WithResp(RespTypes.OperateFailed, "添加失败!");
@@ -149,7 +149,7 @@ namespace OSS.Orm.DapperMysql
         /// <returns></returns>
         protected static Task<Resp> Update(Expression<Func<TType, object>> updateExp,
             Expression<Func<TType, bool>> whereExp, object mo = null)
-            => ExcuteWriteAsync(con => con.UpdatePartial(m_TableName, updateExp, whereExp, mo));
+            => ExecuteWriteAsync(con => con.UpdatePartial(m_TableName, updateExp, whereExp, mo));
 
 
         /// <summary>
@@ -158,7 +158,7 @@ namespace OSS.Orm.DapperMysql
         /// <param name="whereExp">判断条件，如果为空默认根据Id判断</param>
         /// <returns></returns>
         protected static Task<Resp<TType>> Get(Expression<Func<TType, bool>> whereExp)
-            => ExcuteReadeAsync(con => con.Get(m_TableName, whereExp));
+            => ExecuteReadeAsync(con => con.Get(m_TableName, whereExp));
 
 
         /// <summary>
@@ -167,7 +167,7 @@ namespace OSS.Orm.DapperMysql
         /// <param name="whereExp"></param>
         /// <returns></returns>
         protected static Task<Resp<IList<TType>>> GetList(Expression<Func<TType, bool>> whereExp)
-            => ExcuteReadeAsync(con => con.GetList(m_TableName, whereExp));
+            => ExecuteReadeAsync(con => con.GetList(m_TableName, whereExp));
 
 
         /// <summary>
@@ -192,7 +192,7 @@ namespace OSS.Orm.DapperMysql
         /// <param name="para"></param>
         /// <returns></returns>
         protected virtual  Task<Resp> Update(string updateSql, string whereSql, object para = null)
-            =>  ExcuteWriteAsync(async con =>
+            =>  ExecuteWriteAsync(async con =>
             {
                 var sql = string.Concat("UPDATE ", m_TableName, " SET ", updateSql, whereSql);
                 var row = await con.ExecuteAsync(sql, para);
@@ -210,7 +210,7 @@ namespace OSS.Orm.DapperMysql
         protected virtual Task<Resp<TType>> Get(string whereSql, object para)
         {
             string sql = string.Concat("select * from ", m_TableName," ", whereSql);
-            return ExcuteReadeAsync(con => con.QuerySingleOrDefaultAsync<TType>(sql, para));
+            return ExecuteReadeAsync(con => con.QuerySingleOrDefaultAsync<TType>(sql, para));
         }
 
 
@@ -236,7 +236,7 @@ namespace OSS.Orm.DapperMysql
         protected virtual async Task<ListResp<TType>> GetList(string getSql,
             object paras)
         {
-            return await ExcuteReadeResAsync(async con =>
+            return await ExecuteReadeResAsync(async con =>
             {
                 var list = (await con.QueryAsync<TType>(getSql, paras))?.ToList();
 
@@ -255,7 +255,7 @@ namespace OSS.Orm.DapperMysql
         /// <returns></returns>
         protected virtual async Task<PageListResp<TType>> GetPageList(string selectSql,object paras, string totalSql=null)
         {
-            return await ExcuteReadeResAsync(async con =>
+            return await ExecuteReadeResAsync(async con =>
             {
                 long total=0;
 
@@ -293,7 +293,7 @@ namespace OSS.Orm.DapperMysql
         /// <returns></returns>
         protected virtual Task<Resp> SoftDelete(string sql,object paras)
         {
-            return ExcuteWriteAsync(async con =>
+            return ExecuteWriteAsync(async con =>
             {
                 var rows = await con.ExecuteAsync(sql, paras);
                 return rows > 0 ? new Resp() : new Resp().WithResp(RespTypes.OperateFailed, "soft delete Failed!");

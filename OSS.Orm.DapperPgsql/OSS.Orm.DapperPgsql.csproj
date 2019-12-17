@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>1.0.0</Version>
+    <Version>1.1</Version>
     <PackageReleaseNotes></PackageReleaseNotes>
     <PackageIconUrl>http://img1.osscore.cn/static/oss_net.png</PackageIconUrl>
     <PackageProjectUrl>https://github.com/KevinWG/OSS.Orm.Extention</PackageProjectUrl>
@@ -12,7 +12,7 @@
   <ItemGroup>
     <PackageReference Include="Dapper" Version="2.0.4" />
     <PackageReference Include="Npgsql" Version="4.0.10" />
-    <PackageReference Include="OSS.Common" Version="2.2.0.1" />
+    <PackageReference Include="OSS.Common" Version="2.2.0.3" />
     <PackageReference Include="OSS.Tools.Log" Version="1.1.1" />
   </ItemGroup>
 

@@ -22,9 +22,7 @@ namespace OSS.Orm.DapperTests
             var addRes = UserInfoRep.Instance.Add(new UserInfo()
             {
                 id = id,
-                user_name = $"test_name_{id}",
-                add_time = time,
-                m_time = time
+                user_name = $"test_name_{id}"
             }).Result;
             Assert.True(addRes.IsSuccess());
 
@@ -35,8 +33,8 @@ namespace OSS.Orm.DapperTests
             var getRes = UserInfoRep.Instance.Get(id).Result;
             Assert.True(getRes.IsSuccess());
 
-            var getListRes = UserInfoRep.Instance.GetList().Result;
-            Assert.True(getListRes.IsSuccess());
+            //var getListRes = UserInfoRep.Instance.GetList().Result;
+            //Assert.True(getListRes.IsSuccess());
         }
     }
 
@@ -74,9 +72,9 @@ namespace OSS.Orm.DapperTests
         }
 
 
-        public async Task<Resp> GetList()
-        {
-            return await GetList(u => u.add_time>0);
-        }
+        //public async Task<Resp> GetList()
+        //{
+        //    return await GetList(u => u.add_time>0);
+        //}
     }
 }
