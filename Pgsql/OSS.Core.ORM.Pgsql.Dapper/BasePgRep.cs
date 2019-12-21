@@ -21,8 +21,8 @@ using Dapper;
 using Npgsql;
 using OSS.Common.BasicMos;
 using OSS.Common.BasicMos.Enums;
-using OSS.Common.Resp;
-using OSS.Orm.DapperPgsql.OrmExtention;
+using OSS.Common.BasicMos.Resp;
+using OSS.Core.ORM.Pgsql.Dapper.OrmExtention;
 using OSS.Tools.Log;
 
 namespace OSS.Orm.DapperPgsql

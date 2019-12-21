@@ -281,8 +281,6 @@ namespace OSS.Orm.DapperPgsql.OrmExtention
             }
         }
 
-
-
         protected virtual void VisitConditional(ConditionalExpression conditionalExpression)
         {
             // todo
@@ -490,9 +488,6 @@ namespace OSS.Orm.DapperPgsql.OrmExtention
 
         #endregion
     }
-
-
-
 
     public enum SqlVistorType
     {

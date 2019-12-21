@@ -21,8 +21,8 @@ using Dapper;
 using MySql.Data.MySqlClient;
 using OSS.Common.BasicMos;
 using OSS.Common.BasicMos.Enums;
-using OSS.Common.Resp;
-using OSS.Orm.DapperMysql.OrmExtention;
+using OSS.Common.BasicMos.Resp;
+using OSS.Core.ORM.Mysql.Dapper.OrmExtention;
 using OSS.Tools.Log;
 
 namespace OSS.Orm.DapperMysql

@@ -19,9 +19,10 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using Dapper;
-using OSS.Common.Resp;
+using OSS.Common.BasicMos.Resp;
+using OSS.Orm.DapperMysql.OrmExtention;
 
-namespace OSS.Orm.DapperMysql.OrmExtention
+namespace OSS.Core.ORM.Mysql.Dapper.OrmExtention
 {
     internal static class ConnoctionExtention 
     {

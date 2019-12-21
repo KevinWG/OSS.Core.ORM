@@ -1,13 +1,13 @@
 using System;
 using System.Threading.Tasks;
 using OSS.Common.BasicMos;
-using OSS.Common.ComUtils;
+using OSS.Common.BasicMos.Resp;
 using OSS.Common.Extention;
-using OSS.Common.Resp;
+using OSS.Common.Helpers;
 using OSS.Orm.DapperPgsql;
 using Xunit;
 
-namespace OSS.Orm.DapperTests
+namespace OSS.Core.ORM.Tests
 {
 
     public class PostgresqlTests
@@ -16,7 +16,7 @@ namespace OSS.Orm.DapperTests
         [Fact]
         public void Test1()
         {
-            var id = NumUtil.SnowNum().ToString();
+            var id = NumHelper.SnowNum().ToString();
             var time = DateTime.Now.ToUtcSeconds();
 
             var addRes = UserInfoRep.Instance.Add(new UserInfo()

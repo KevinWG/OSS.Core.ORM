@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
@@ -13,8 +13,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\OSS.Orm.DapperMysql\OSS.Orm.DapperMysql.csproj" />
-    <ProjectReference Include="..\OSS.Orm.DapperPgsql\OSS.Orm.DapperPgsql.csproj" />
+    <ProjectReference Include="..\Mysql\OSS.Core.ORM.Mysql.Dapper\OSS.Core.ORM.Mysql.Dapper.csproj" />
+    <ProjectReference Include="..\Pgsql\OSS.Core.ORM.Pgsql.Dapper\OSS.Core.ORM.Pgsql.Dapper.csproj" />
   </ItemGroup>
 
 </Project>

@@ -19,10 +19,10 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using Dapper;
-using OSS.Common.ComModels;
-using OSS.Common.Resp;
+using OSS.Common.BasicMos.Resp;
+using OSS.Orm.DapperPgsql.OrmExtention;
 
-namespace OSS.Orm.DapperPgsql.OrmExtention
+namespace OSS.Core.ORM.Pgsql.Dapper.OrmExtention
 {
     internal static class ConnoctionExtention 
     {

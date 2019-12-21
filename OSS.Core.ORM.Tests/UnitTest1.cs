@@ -1,7 +1,6 @@
-using System;
 using Xunit;
 
-namespace OSS.Orm.DapperTests
+namespace OSS.Core.ORM.Tests
 {
     public class UnitTest1
     {
