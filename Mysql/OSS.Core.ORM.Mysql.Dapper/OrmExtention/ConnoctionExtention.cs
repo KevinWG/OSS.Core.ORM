@@ -128,7 +128,7 @@ namespace OSS.Core.ORM.Mysql.Dapper.OrmExtention
 
             return await con.QuerySingleOrDefaultAsync<TType>(sqlStr, paras);
         }
-        public static async Task<IList<TType>> GetList<TType>(this IDbConnection con, string tableName, Expression<Func<TType, bool>> whereExp)
+        public static async Task<ListResp<TType>> GetList<TType>(this IDbConnection con, string tableName, Expression<Func<TType, bool>> whereExp)
         {
             if (string.IsNullOrEmpty(tableName))
                 tableName = typeof(TType).Name;
@@ -140,7 +140,10 @@ namespace OSS.Core.ORM.Mysql.Dapper.OrmExtention
             var paras = GetExcuteParas(null, sqlVisitor);
 
             var listRes = (await con.QueryAsync<TType>(sqlStr, paras)).ToList();
-            return listRes.Count == 0 ? null : listRes.ToList();// 没有返回空，上边处理
+
+            return listRes.Count == 0 
+                ? new ListResp<TType>().WithResp(RespTypes.ObjectNull, "没有查到相关信息！") 
+                : new ListResp<TType>(listRes.ToList()) ;
         }
 
         /// <summary>

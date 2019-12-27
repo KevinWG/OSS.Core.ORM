@@ -4,6 +4,7 @@ using OSS.Common.BasicMos;
 using OSS.Common.BasicMos.Resp;
 using OSS.Common.Extention;
 using OSS.Common.Helpers;
+using OSS.Core.ORM.Pgsql.Dapper;
 using OSS.Orm.DapperPgsql;
 using Xunit;
 
@@ -52,7 +53,7 @@ namespace OSS.Core.ORM.Tests
 
         public UserInfoRep() : base(connectStr, connectStr)
         {
-            m_TableName = "userinfo";
+            TableName = "userinfo";
         }
 
 

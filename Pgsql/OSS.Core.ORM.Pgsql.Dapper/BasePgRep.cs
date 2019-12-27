@@ -19,25 +19,26 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Dapper;
 using Npgsql;
+using OSS.Common.BasicImpls;
 using OSS.Common.BasicMos;
 using OSS.Common.BasicMos.Enums;
 using OSS.Common.BasicMos.Resp;
 using OSS.Core.ORM.Pgsql.Dapper.OrmExtention;
 using OSS.Tools.Log;
 
-namespace OSS.Orm.DapperPgsql
+namespace OSS.Core.ORM.Pgsql.Dapper
 {
     /// <summary>
     /// 仓储层基类
     /// </summary>
-    public class BasePgRep<TRep,TType,IdType>
+    public class BasePgRep<TRep,TType,IdType>:SingleInstance<TRep>
         where TRep:class ,new()
         where TType:BaseMo<IdType>,new()
     {
-        protected static string m_TableName;
+        protected string TableName { get; set; }
 
-        private static string _writeConnectionString;
-        private static string _readConnectionString;
+        private readonly string _writeConnectionString;
+        private readonly string _readConnectionString;
 
         public BasePgRep(string writeConnectionStr, string readConnectionStr )
         {
@@ -45,79 +46,7 @@ namespace OSS.Orm.DapperPgsql
             _readConnectionString = readConnectionStr;
         }
         
-
-        #region 底层基础读写分离操作封装
-
-        /// <summary>
-        /// 执行写数据库操作
-        /// </summary>
-        /// <typeparam name="RType"></typeparam>
-        /// <param name="func"></param>
-        /// <returns></returns>
-        protected internal static Task<RType> ExecuteWriteAsync<RType>(Func<IDbConnection, Task<RType>> func) where RType : Resp, new()
-            => Execute(func, true);
-
-        /// <summary>
-        ///  执行读操作，返回具体类型，自动包装成Resp结果实体
-        /// </summary>
-        /// <typeparam name="RType"></typeparam>
-        /// <param name="func"></param>
-        /// <returns></returns>
-        protected internal static  Task<Resp<RType>> ExecuteReadeAsync<RType>(Func<IDbConnection, Task<RType>> func) => Execute(async con =>
-        {
-            var res =await func(con);
-            return res != null ? new Resp<RType>(res) : new Resp<RType>().WithResp(RespTypes.ObjectNull, "未发现相关数据！");
-        }, false);
-
-        /// <summary>
-        /// 执行读操作，直接返回继承自Resp实体
-        /// </summary>
-        /// <typeparam name="RType"></typeparam>
-        /// <param name="func"></param>
-        /// <returns></returns>
-        protected internal static async Task<RType> ExecuteReadeResAsync<RType>(Func<IDbConnection, Task<RType>> func) where RType : Resp, new()
-            =>await Execute(func, false);
-
-        private static async Task<RType> Execute<RType>(Func<IDbConnection, Task<RType>> func, bool isWrite)
-            where RType : Resp, new()
-        {
-            RType t;
-
-            try
-            {
-                if (DbConnector==null)
-                {
-                    DbConnector = GetDefaultConnection;
-                }
-                using (var con = DbConnector.Invoke(isWrite))
-                {
-                    t = await func(con);
-                }
-
-            }
-            catch (Exception e)
-            {
-                LogHelper.Error(string.Concat("数据库操作错误,仓储表名：",m_TableName,"，详情：", e.Message, "\r\n", e.StackTrace), "DataRepConnectionError",
-                    "DapperRep_PG");
-                t = new RType
-                {
-                    ret = (int) RespTypes.InnerError,
-                    msg = isWrite?"数据操作出错！":"数据读取出错！"
-                };
-            }
-            return t ?? new RType() {ret = (int) RespTypes.ObjectNull, msg = "未发现对应结果"};
-        }
-        
-        private static IDbConnection GetDefaultConnection(bool isWrite)
-        {
-            return new NpgsqlConnection(isWrite ? _writeConnectionString : _readConnectionString);
-        }
-
-        protected static Func<bool, IDbConnection> DbConnector { get; set; }
-
-        #endregion
-
-        #region 基础CRUD 表达式扩展
+        #region Add
 
         /// <summary>
         ///   插入数据
@@ -128,7 +57,7 @@ namespace OSS.Orm.DapperPgsql
         {
             var res = await ExecuteWriteAsync(async con =>
             {
-                var row = await con.Insert(m_TableName, mo);
+                var row = await con.Insert(TableName, mo);
                 return row > 0 ? new IdResp<IdType>() 
                     : new IdResp<IdType>().WithResp(RespTypes.OperateFailed, "添加失败!");
             });
@@ -139,6 +68,9 @@ namespace OSS.Orm.DapperPgsql
             return res;
         }
 
+        #endregion
+
+        #region Update
 
         /// <summary>
         /// 部分字段的更新
@@ -149,42 +81,9 @@ namespace OSS.Orm.DapperPgsql
         /// w=>w.id==1  , 如果为空默认根据Id判断</param>
         /// <param name="mo"></param>
         /// <returns></returns>
-        protected static Task<Resp> Update(Expression<Func<TType, object>> updateExp,
+        protected virtual Task<Resp> Update(Expression<Func<TType, object>> updateExp,
             Expression<Func<TType, bool>> whereExp, object mo = null)
-            => ExecuteWriteAsync(con => con.UpdatePartial(m_TableName, updateExp, whereExp, mo));
-
-
-        /// <summary>
-        ///  获取单个实体对象
-        /// </summary>
-        /// <param name="whereExp">判断条件，如果为空默认根据Id判断</param>
-        /// <returns></returns>
-        protected static Task<Resp<TType>> Get(Expression<Func<TType, bool>> whereExp)
-            => ExecuteReadeAsync(con => con.Get(m_TableName, whereExp));
-
-
-        /// <summary>
-        ///   列表查询
-        /// </summary>
-        /// <param name="whereExp"></param>
-        /// <returns></returns>
-        protected static Task<Resp<IList<TType>>> GetList(Expression<Func<TType, bool>> whereExp)
-            => ExecuteReadeAsync(con => con.GetList(m_TableName, whereExp));
-
-
-        /// <summary>
-        /// 软删除，直接修改  status = CommonStatus.Delete 
-        /// </summary>
-        /// <param name="whereExp">条件表达式</param>
-        /// <returns></returns>
-        protected static Task<Resp> SoftDelete(Expression<Func<TType, bool>> whereExp)
-        {
-            return Update(m => new {status = CommonStatus.Delete}, whereExp);
-        }
-
-        #endregion
-
-        #region 基础CRUD sql方法扩展
+            => ExecuteWriteAsync(con => con.UpdatePartial(TableName, updateExp, whereExp, mo));
 
         /// <summary>
         ///  直接使用语句更新操作
@@ -193,13 +92,80 @@ namespace OSS.Orm.DapperPgsql
         /// <param name="whereSql"></param>
         /// <param name="para"></param>
         /// <returns></returns>
-        protected virtual  Task<Resp> Update(string updateSql, string whereSql, object para = null)
-            =>  ExecuteWriteAsync(async con =>
+        protected virtual Task<Resp> Update(string updateSql, string whereSql, object para = null)
+            => ExecuteWriteAsync(async con =>
             {
-                var sql = string.Concat("UPDATE ", m_TableName, " SET ", updateSql, whereSql);
+                var sql = string.Concat("UPDATE ", TableName, " SET ", updateSql, whereSql);
                 var row = await con.ExecuteAsync(sql, para);
                 return row > 0 ? new Resp() : new Resp().WithResp(RespTypes.OperateFailed, "更新失败");
             });
+
+        #endregion
+
+        #region Delete
+
+        /// <summary>
+        /// 软删除，仅仅修改  status = CommonStatus.Delete 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public virtual Task<Resp> SoftDeleteById(string id)
+        {
+            var sql     = string.Concat("UPDATE ", TableName, " SET status=@status WHERE id=@id");
+            var dirPara = new Dictionary<string, object> {{"@id", id}, {"@status", (int) CommonStatus.Delete}};
+
+            return SoftDelete(sql, dirPara);
+        }
+
+        /// <summary>
+        /// 软删除，直接修改  status = CommonStatus.Delete 
+        /// </summary>
+        /// <param name="whereExp">条件表达式</param>
+        /// <returns></returns>
+        protected virtual Task<Resp> SoftDelete(Expression<Func<TType, bool>> whereExp)
+        {
+            return Update(m => new {status = CommonStatus.Delete}, whereExp);
+        }
+
+        /// <summary>
+        /// 软删除，直接修改状态
+        /// </summary>
+        /// <param name="sql"></param>
+        /// <param name="paras"></param>
+        /// <returns></returns>
+        protected virtual Task<Resp> SoftDelete(string sql, object paras)
+        {
+            return ExecuteWriteAsync(async con =>
+            {
+                var rows = await con.ExecuteAsync(sql, paras);
+                return rows > 0 ? new Resp() : new Resp().WithResp(RespTypes.OperateFailed, "soft delete Failed!");
+            });
+        }
+
+        #endregion
+
+        #region Get
+
+        /// <summary>
+        /// 通过id获取实体
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public virtual Task<Resp<TType>> GetById(string id)
+        {
+            const string whereSql = " WHERE id=@id";
+            var          dirPara  = new Dictionary<string, object> { { "@id", id } };
+
+            return Get(whereSql, dirPara);
+        }
+
+        /// <summary>
+        ///  获取单个实体对象
+        /// </summary>
+        /// <param name="whereExp">判断条件，如果为空默认根据Id判断</param>
+        /// <returns></returns>
+        protected virtual Task<Resp<TType>> Get(Expression<Func<TType, bool>> whereExp)
+            => ExecuteReadAsync(con => con.Get(TableName, whereExp));
 
 
         /// <summary>
@@ -211,23 +177,21 @@ namespace OSS.Orm.DapperPgsql
         /// <returns></returns>
         protected virtual Task<Resp<TType>> Get(string whereSql, object para)
         {
-            string sql = string.Concat("select * from ", m_TableName," ", whereSql);
-            return ExecuteReadeAsync(con => con.QuerySingleOrDefaultAsync<TType>(sql, para));
+            string sql = string.Concat("select * from ", TableName," ", whereSql);
+            return ExecuteReadAsync(con => con.QuerySingleOrDefaultAsync<TType>(sql, para));
         }
 
+        #endregion
+
+        #region Get(Page)List
 
         /// <summary>
-        /// 通过id获取实体
+        ///   列表查询
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="whereExp"></param>
         /// <returns></returns>
-        public  virtual Task<Resp<TType>> GetById(string id)
-        {
-            const string whereSql = " WHERE id=@id";
-            var dirPara = new Dictionary<string, object> { { "@id", id } };
-           
-            return  Get(whereSql, dirPara);
-        }
+        protected virtual Task<ListResp<TType>> GetList(Expression<Func<TType, bool>> whereExp)
+            => ExecuteReadSubAsync(con => con.GetList(TableName, whereExp));
 
         /// <summary>
         ///   列表查询
@@ -238,7 +202,7 @@ namespace OSS.Orm.DapperPgsql
         protected virtual async Task<ListResp<TType>> GetList(string getSql,
             object paras)
         {
-            return await ExecuteReadeResAsync(async con =>
+            return await ExecuteReadSubAsync(async con =>
             {
                 var list = (await con.QueryAsync<TType>(getSql, paras))?.ToList();
 
@@ -255,85 +219,82 @@ namespace OSS.Orm.DapperPgsql
         /// <param name="totalSql">查询数量语句，不需要排序,如果为空，则不计算和返回总数信息</param>
         /// <param name="paras">参数内容</param>
         /// <returns></returns>
-        protected virtual async Task<PageListResp<TType>> GetPageList(string selectSql,object paras, string totalSql=null)
+        protected virtual async Task<PageListResp<TType>> GetPageList(string selectSql, object paras, string totalSql = null)
         {
-            return await ExecuteReadeResAsync(async con =>
+            return await ExecuteReadSubAsync(async con =>
             {
-                long total=0;
+                long total =0;
 
                 if (!string.IsNullOrEmpty(totalSql))
                 {
                     total = await con.ExecuteScalarAsync<long>(totalSql, paras);
                     if (total <= 0) return new PageListResp<TType>().WithResp(RespTypes.ObjectNull, "没有查到相关信息！");
                 }
-             
+
                 var list = await con.QueryAsync<TType>(selectSql, paras);
                 return new PageListResp<TType>(total, list.ToList());
             });
         }
 
-
-
-        /// <summary>
-        /// 软删除，仅仅修改  status = CommonStatus.Delete 
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public virtual  Task<Resp> SoftDeleteById(string id)
-        {
-            var sql = string.Concat("UPDATE ", m_TableName, " SET status=@status WHERE id=@id");
-            var dirPara = new Dictionary<string, object> {{"@id", id}, {"@status", (int) CommonStatus.Delete}};
-
-            return SoftDelete(sql, dirPara);
-        }
-
-        /// <summary>
-        /// 软删除，直接修改状态
-        /// </summary>
-        /// <param name="sql"></param>
-        /// <param name="paras"></param>
-        /// <returns></returns>
-        protected virtual Task<Resp> SoftDelete(string sql,object paras)
-        {
-            return ExecuteWriteAsync(async con =>
-            {
-                var rows = await con.ExecuteAsync(sql, paras);
-                return rows > 0 ? new Resp() : new Resp().WithResp(RespTypes.OperateFailed, "soft delete Failed!");
-            });
-        }
-
         #endregion
-        
-        #region 单例模块
 
-        private static readonly object _lockObj = new object();
-
-        private static TRep _instance;
+        #region 底层基础读写分离操作封装
 
         /// <summary>
-        ///   接口请求实例  
-        ///  当 DefaultConfig 设值之后，可以直接通过当前对象调用
+        /// 执行写数据库操作
         /// </summary>
-        public static TRep Instance
-        {
-            get
-            {
-                if (_instance != null)
-                    return _instance;
+        /// <typeparam name="RespType"></typeparam>
+        /// <param name="func"></param>
+        /// <returns></returns>
+        protected Task<RespType> ExecuteWriteAsync<RespType>(Func<IDbConnection, Task<RespType>> func) where RespType : Resp, new()
+            => Execute(func, true);
 
-                lock (_lockObj)
+        /// <summary>
+        ///  执行读操作，返回具体类型，自动包装成Resp结果实体
+        /// </summary>
+        /// <typeparam name="RespParaType"></typeparam>
+        /// <param name="func"></param>
+        /// <returns></returns>
+        protected Task<Resp<RespParaType>> ExecuteReadAsync<RespParaType>(Func<IDbConnection, Task<RespParaType>> func) => Execute(async con =>
+        {
+            var res =await func(con);
+            return res != null ? new Resp<RespParaType>(res) : new Resp<RespParaType>().WithResp(RespTypes.ObjectNull, "未发现相关数据！");
+        }, false);
+
+        /// <summary>
+        /// 执行读操作，直接返回继承自Resp实体
+        /// </summary>
+        /// <typeparam name="SubRespType"></typeparam>
+        /// <param name="func"></param>
+        /// <returns></returns>
+        protected async Task<SubRespType> ExecuteReadSubAsync<SubRespType>(Func<IDbConnection, Task<SubRespType>> func) where SubRespType : Resp, new()
+            => await Execute(func, false);
+
+        private async Task<RType> Execute<RType>(Func<IDbConnection, Task<RType>> func, bool isWrite)
+            where RType : Resp, new()
+        {
+            RType t;
+            try
+            {
+                using (var con = new NpgsqlConnection(isWrite ? _writeConnectionString : _readConnectionString))
                 {
-                    if (_instance == null)
-                        // ReSharper disable once PossibleMultipleWriteAccessInDoubleCheckLocking
-                        _instance = new TRep();
+                    t = await func(con);
                 }
-                return _instance;
             }
-
+            catch (Exception e)
+            {
+                LogHelper.Error(string.Concat("数据库操作错误,仓储表名：", TableName, "，详情：", e.Message, "\r\n", e.StackTrace), "DataRepConnectionError",
+                    "DapperRep_PG");
+                t = new RType
+                {
+                    ret = (int) RespTypes.InnerError,
+                    msg = isWrite ? "数据写入出错！" : "数据读取出错！"
+                };
+            }
+            return t ?? new RType() { ret = (int) RespTypes.ObjectNull, msg = "未发现对应结果" };
         }
 
         #endregion
-
     }
 
 

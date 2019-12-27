@@ -7,6 +7,12 @@
     <PackageIconUrl>http://img1.osscore.cn/static/oss_net.png</PackageIconUrl>
     <Authors>OSSCore</Authors>
     <Description>Pgsql的Dapper扩展</Description>
+    <Version>1.1</Version>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>bin\Release\netstandard2.0\OSS.Core.ORM.Pgsql.Dapper.xml</DocumentationFile>
+    <OutputPath>bin\Release\netstandard2.0\</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>
