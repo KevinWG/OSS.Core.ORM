@@ -31,12 +31,10 @@ namespace OSS.Core.ORM.Pgsql.Dapper
     /// <summary>
     /// 仓储层基类
     /// </summary>
-    public class BasePgRep<TRep,TType,IdType>:SingleInstance<TRep>
+    public abstract class BasePgRep<TRep,TType,IdType>:SingleInstance<TRep>
         where TRep:class ,new()
         where TType:BaseMo<IdType>,new()
     {
-        protected string TableName { get; set; }
-
         private readonly string _writeConnectionString;
         private readonly string _readConnectionString;
 
@@ -45,7 +43,20 @@ namespace OSS.Core.ORM.Pgsql.Dapper
             _writeConnectionString = writeConnectionStr;
             _readConnectionString = readConnectionStr;
         }
-        
+
+
+        /// <summary>
+        ///  仓储表名
+        /// </summary>
+        public string TableName => GetTableName();
+
+        /// <summary>
+        /// 获取仓储表名
+        ///  便于分表时按需扩展
+        /// </summary>
+        /// <returns></returns>
+        protected abstract string GetTableName();
+
         #region Add
 
         /// <summary>
