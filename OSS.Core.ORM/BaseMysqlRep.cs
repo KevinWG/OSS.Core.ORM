@@ -1,11 +1,11 @@
-﻿#region Copyright (C) 2019 Kevin (OSS开源实验室) 公众号：osscore
+﻿#region Copyright (C) 2017 Kevin (OSS开源实验室) 公众号：osscoder
 
 /***************************************************************************
 *　　	文件功能描述：OSSCore仓储层 —— 仓储基类
 *
 *　　	创建人： Kevin
 *       创建人Email：1985088337@qq.com
-*    	创建日期：2019-6-15
+*    	创建日期：2017-4-21
 *       
 *****************************************************************************/
 
@@ -18,22 +18,22 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Dapper;
-using Npgsql;
+using MySql.Data.MySqlClient;
 using OSS.Common.BasicImpls;
 using OSS.Common.BasicMos;
 using OSS.Common.BasicMos.Enums;
 using OSS.Common.BasicMos.Resp;
-using OSS.Core.ORM.Pgsql.Dapper.OrmExtention;
+using OSS.Core.ORM.Mysql.Dapper.OrmExtention;
 using OSS.Tools.Log;
 
-namespace OSS.Core.ORM.Pgsql.Dapper
+namespace OSS.Core.ORM.Mysql.Dapper
 {
     /// <summary>
     /// 仓储层基类
     /// </summary>
-    public abstract class BasePgRep<TRep,TType,IdType>:SingleInstance<TRep>
-        where TRep:class ,new()
-        where TType:BaseMo<IdType>,new()
+    public abstract class BaseMysqlRep<TRep, TType, IdType> : SingleInstance<TRep>
+        where TRep : class, new()
+        where TType : BaseMo<IdType>, new()
     {
         /// <summary>
         ///  仓储表名
@@ -51,7 +51,7 @@ namespace OSS.Core.ORM.Pgsql.Dapper
         /// 获取数据库连接
         /// </summary>
         /// <returns></returns>
-        protected abstract NpgsqlConnection GetDbConnection(bool isWriteOperate);
+        protected abstract MySqlConnection GetDbConnection(bool isWriteOperate);
 
         #region Add
 
@@ -65,19 +65,19 @@ namespace OSS.Core.ORM.Pgsql.Dapper
             var res = await ExecuteWriteAsync(async con =>
             {
                 var row = await con.Insert(TableName, mo);
-                return row > 0 ? new IdResp<IdType>() 
-                    : new IdResp<IdType>().WithResp(RespTypes.OperateFailed, "添加失败!");
+                return row > 0 ? new IdResp<IdType>() : new IdResp<IdType>().WithResp(RespTypes.OperateFailed, "添加失败!");
             });
             if (res.IsSuccess())
             {
                 res.id = mo.id;
             }
+
             return res;
         }
 
         #endregion
 
-        #region Update
+        #region Update 
 
         /// <summary>
         /// 部分字段的更新
@@ -104,7 +104,7 @@ namespace OSS.Core.ORM.Pgsql.Dapper
             {
                 var sql = string.Concat("UPDATE ", TableName, " SET ", updateSql, whereSql);
                 var row = await con.ExecuteAsync(sql, para);
-                return row > 0 ? new Resp() : new Resp().WithResp(RespTypes.OperateFailed, "更新失败");
+                return row > 0 ? new Resp() : new Resp().WithResp(ret: RespTypes.OperateFailed, "更新失败");
             });
 
         #endregion
@@ -149,9 +149,11 @@ namespace OSS.Core.ORM.Pgsql.Dapper
             });
         }
 
+
         #endregion
 
         #region Get
+
 
         /// <summary>
         /// 通过id获取实体
@@ -161,7 +163,7 @@ namespace OSS.Core.ORM.Pgsql.Dapper
         public virtual Task<Resp<TType>> GetById(string id)
         {
             const string whereSql = " WHERE id=@id";
-            var          dirPara  = new Dictionary<string, object> { { "@id", id } };
+            var dirPara = new Dictionary<string, object> {{"@id", id}};
 
             return Get(whereSql, dirPara);
         }
@@ -171,24 +173,39 @@ namespace OSS.Core.ORM.Pgsql.Dapper
         /// </summary>
         /// <param name="whereExp">判断条件，如果为空默认根据Id判断</param>
         /// <returns></returns>
-        protected virtual Task<Resp<TType>> Get(Expression<Func<TType, bool>> whereExp)
+        protected Task<Resp<TType>> Get(Expression<Func<TType, bool>> whereExp)
             => ExecuteReadAsync(con => con.Get(TableName, whereExp));
 
         /// <summary>
         /// 通过sql语句获取实体
         /// </summary>
+        /// <typeparam>
+        ///     <name>TType</name>
+        /// </typeparam>
         /// <param name="whereSql"> 条件sql语句</param>
         /// <param name="para"></param>
         /// <returns></returns>
-        protected virtual Task<Resp<TType>> Get(string whereSql, object para)
+        protected Task<Resp<TType>> Get(string whereSql, object para)
+        {
+            return Get<TType>(whereSql, para);
+        }
+
+        /// <summary>
+        /// 通过sql语句获取实体
+        /// </summary>
+        /// <typeparam name="RType"></typeparam>
+        /// <param name="whereSql"> 条件sql语句</param>
+        /// <param name="para"></param>
+        /// <returns></returns>
+        protected virtual Task<Resp<RType>> Get<RType>(string whereSql, object para)
         {
             var sql = string.Concat("select * from ", TableName, " ", whereSql);
-            return ExecuteReadAsync(con => con.QuerySingleOrDefaultAsync<TType>(sql, para));
+            return ExecuteReadAsync(con => con.QuerySingleOrDefaultAsync<RType>(sql, para));
         }
 
         #endregion
 
-        #region Get(Page)List
+        #region Get（Page）List
 
         /// <summary>
         ///   列表查询
@@ -198,14 +215,13 @@ namespace OSS.Core.ORM.Pgsql.Dapper
         protected virtual Task<ListResp<TType>> GetList(Expression<Func<TType, bool>> whereExp)
             => ExecuteReadSubAsync(con => con.GetList(TableName, whereExp));
 
-
         /// <summary>
         ///   列表查询
         /// </summary>
         /// <param name="getSql">查询语句</param>
         /// <param name="paras">参数内容</param>
         /// <returns></returns>
-        protected Task<ListResp<TType>> GetList(string getSql, object paras)
+        protected Task<ListResp<TType>> GetList(string getSql,object paras)
         {
             return GetList<TType>(getSql, paras);
         }
@@ -229,7 +245,6 @@ namespace OSS.Core.ORM.Pgsql.Dapper
             });
         }
 
-
         /// <summary>
         ///   列表查询
         /// </summary>
@@ -237,7 +252,7 @@ namespace OSS.Core.ORM.Pgsql.Dapper
         /// <param name="totalSql">查询数量语句，不需要排序,如果为空，则不计算和返回总数信息</param>
         /// <param name="paras">参数内容</param>
         /// <returns></returns>
-        protected Task<PageListResp<TType>> GetPageList(string selectSql, object paras,
+        protected  Task<PageListResp<TType>> GetPageList(string selectSql, object paras,
             string totalSql = null)
         {
             return GetPageList<TType>(selectSql, paras, totalSql);
@@ -277,7 +292,8 @@ namespace OSS.Core.ORM.Pgsql.Dapper
         /// <typeparam name="RespType"></typeparam>
         /// <param name="func"></param>
         /// <returns></returns>
-        protected Task<RespType> ExecuteWriteAsync<RespType>(Func<IDbConnection, Task<RespType>> func) where RespType : Resp, new()
+        protected Task<RespType> ExecuteWriteAsync<RespType>(Func<IDbConnection, Task<RespType>> func)
+            where RespType : Resp, new()
             => ExecuteAsync(func, true);
 
         /// <summary>
@@ -286,11 +302,14 @@ namespace OSS.Core.ORM.Pgsql.Dapper
         /// <typeparam name="RespParaType"></typeparam>
         /// <param name="func"></param>
         /// <returns></returns>
-        protected Task<Resp<RespParaType>> ExecuteReadAsync<RespParaType>(Func<IDbConnection, Task<RespParaType>> func) => ExecuteAsync(async con =>
-        {
-            var res =await func(con);
-            return res != null ? new Resp<RespParaType>(res) : new Resp<RespParaType>().WithResp(RespTypes.ObjectNull, "未发现相关数据！");
-        }, false);
+        protected Task<Resp<RespParaType>> ExecuteReadAsync<RespParaType>(Func<IDbConnection, Task<RespParaType>> func)
+            => ExecuteAsync(async con =>
+            {
+                var res = await func(con);
+                return res != null
+                    ? new Resp<RespParaType>(res)
+                    : new Resp<RespParaType>().WithResp(RespTypes.ObjectNull, "未发现相关数据！");
+            }, false);
 
         /// <summary>
         /// 执行读操作，直接返回继承自Resp实体
@@ -298,7 +317,8 @@ namespace OSS.Core.ORM.Pgsql.Dapper
         /// <typeparam name="SubRespType"></typeparam>
         /// <param name="func"></param>
         /// <returns></returns>
-        protected async Task<SubRespType> ExecuteReadSubAsync<SubRespType>(Func<IDbConnection, Task<SubRespType>> func) where SubRespType : Resp, new()
+        protected async Task<SubRespType> ExecuteReadSubAsync<SubRespType>(Func<IDbConnection, Task<SubRespType>> func)
+            where SubRespType : Resp, new()
             => await ExecuteAsync(func, false);
 
         private async Task<RType> ExecuteAsync<RType>(Func<IDbConnection, Task<RType>> func, bool isWrite)
@@ -314,21 +334,22 @@ namespace OSS.Core.ORM.Pgsql.Dapper
             }
             catch (Exception e)
             {
-                LogHelper.Error(string.Concat("数据库操作错误,仓储表名：", TableName, "，详情：", e.Message, "\r\n", e.StackTrace), "DataRepConnectionError",
-                    "DapperRep_PG");
+                LogHelper.Error(string.Concat("数据库操作错误,仓储表名：", TableName, "，详情：", e.Message, "\r\n", e.StackTrace),
+                    "DataRepConnectionError",
+                    "DapperRep_Mysql");
                 t = new RType
                 {
                     ret = (int) RespTypes.InnerError,
-                    msg = isWrite ? "数据写入出错！" : "数据读取出错！"
+                    msg = isWrite ? "数据操作出错！" : "数据读取错误"
                 };
             }
-            return t ?? new RType() { ret = (int) RespTypes.ObjectNull, msg = "未发现对应结果" };
+
+            return t ?? new RType() {ret = (int) RespTypes.ObjectNull, msg = "未发现对应结果"};
         }
 
         #endregion
+
     }
-
-
 
 }
 

@@ -9,9 +9,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OSS.Core.ORM.Mysql.Dapper",
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Pgsql", "Pgsql", "{54AA522C-B300-4BAD-852B-3241E8F1F7B9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OSS.Core.ORM.Pgsql.Dapper", "Pgsql\OSS.Core.ORM.Pgsql.Dapper\OSS.Core.ORM.Pgsql.Dapper.csproj", "{0C5E73CC-E658-44A2-8B80-FD141796E40A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OSS.Core.ORM.Pgsql.Dapper", "Pgsql\OSS.Core.ORM.Pgsql.Dapper\OSS.Core.ORM.Pgsql.Dapper.csproj", "{0C5E73CC-E658-44A2-8B80-FD141796E40A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OSS.Core.ORM.Tests", "OSS.Core.ORM.Tests\OSS.Core.ORM.Tests.csproj", "{3B374D19-B05C-48DC-B1D6-E4AB38FDC813}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OSS.Core.ORM", "OSS.Core.ORM\OSS.Core.ORM.csproj", "{36599280-921F-48DA-82A5-62AF4A1C33C3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OSS.Core.ORM.Dapper", "OSS.Core.ORM.Dapper\OSS.Core.ORM.Dapper.csproj", "{3BC7672C-1E83-4459-8276-BD26BB68F17E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,6 +35,14 @@ Global
 		{3B374D19-B05C-48DC-B1D6-E4AB38FDC813}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3B374D19-B05C-48DC-B1D6-E4AB38FDC813}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3B374D19-B05C-48DC-B1D6-E4AB38FDC813}.Release|Any CPU.Build.0 = Release|Any CPU
+		{36599280-921F-48DA-82A5-62AF4A1C33C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{36599280-921F-48DA-82A5-62AF4A1C33C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{36599280-921F-48DA-82A5-62AF4A1C33C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{36599280-921F-48DA-82A5-62AF4A1C33C3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3BC7672C-1E83-4459-8276-BD26BB68F17E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3BC7672C-1E83-4459-8276-BD26BB68F17E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3BC7672C-1E83-4459-8276-BD26BB68F17E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3BC7672C-1E83-4459-8276-BD26BB68F17E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -35,15 +35,6 @@ namespace OSS.Core.ORM.Mysql.Dapper
         where TRep : class, new()
         where TType : BaseMo<IdType>, new()
     {
-        private readonly string _writeConnectionString;
-        private readonly string _readConnectionString;
-
-        public BaseMysqlRep(string writeConnectionStr, string readConnectionStr)
-        {
-            _writeConnectionString = writeConnectionStr;
-            _readConnectionString  = readConnectionStr;
-        }
-
         /// <summary>
         ///  仓储表名
         /// </summary>
@@ -56,6 +47,12 @@ namespace OSS.Core.ORM.Mysql.Dapper
         /// <returns></returns>
         protected abstract string GetTableName();
 
+        /// <summary>
+        /// 获取数据库连接
+        /// </summary>
+        /// <returns></returns>
+        protected abstract MySqlConnection GetDbConnection(bool isWriteOperate);
+
         #region Add
 
         /// <summary>
@@ -63,7 +60,7 @@ namespace OSS.Core.ORM.Mysql.Dapper
         /// </summary>
         /// <param name="mo"></param>
         /// <returns></returns>
-        public async Task<IdResp<IdType>> Add(TType mo)
+        public virtual async Task<IdResp<IdType>> Add(TType mo)
         {
             var res = await ExecuteWriteAsync(async con =>
             {
@@ -95,7 +92,6 @@ namespace OSS.Core.ORM.Mysql.Dapper
             Expression<Func<TType, bool>> whereExp, object mo = null)
             => ExecuteWriteAsync(con => con.UpdatePartial(TableName, updateExp, whereExp, mo));
 
-
         /// <summary>
         ///  直接使用语句更新操作
         /// </summary>
@@ -111,11 +107,9 @@ namespace OSS.Core.ORM.Mysql.Dapper
                 return row > 0 ? new Resp() : new Resp().WithResp(ret: RespTypes.OperateFailed, "更新失败");
             });
 
-
         #endregion
 
         #region Delete
-
 
         /// <summary>
         /// 软删除，仅仅修改  status = CommonStatus.Delete 
@@ -169,7 +163,7 @@ namespace OSS.Core.ORM.Mysql.Dapper
         public virtual Task<Resp<TType>> GetById(string id)
         {
             const string whereSql = " WHERE id=@id";
-            var          dirPara  = new Dictionary<string, object> {{"@id", id}};
+            var dirPara = new Dictionary<string, object> {{"@id", id}};
 
             return Get(whereSql, dirPara);
         }
@@ -179,19 +173,18 @@ namespace OSS.Core.ORM.Mysql.Dapper
         /// </summary>
         /// <param name="whereExp">判断条件，如果为空默认根据Id判断</param>
         /// <returns></returns>
-        protected virtual Task<Resp<TType>> Get(Expression<Func<TType, bool>> whereExp)
+        protected Task<Resp<TType>> Get(Expression<Func<TType, bool>> whereExp)
             => ExecuteReadAsync(con => con.Get(TableName, whereExp));
 
         /// <summary>
         /// 通过sql语句获取实体
         /// </summary>
-        /// <typeparam name="TType"></typeparam>
         /// <param name="whereSql"> 条件sql语句</param>
         /// <param name="para"></param>
         /// <returns></returns>
         protected virtual Task<Resp<TType>> Get(string whereSql, object para)
         {
-            string sql = string.Concat("select * from ", TableName, " ", whereSql);
+            var sql = string.Concat("select * from ", TableName, " ", whereSql);
             return ExecuteReadAsync(con => con.QuerySingleOrDefaultAsync<TType>(sql, para));
         }
 
@@ -213,19 +206,29 @@ namespace OSS.Core.ORM.Mysql.Dapper
         /// <param name="getSql">查询语句</param>
         /// <param name="paras">参数内容</param>
         /// <returns></returns>
-        protected virtual async Task<ListResp<TType>> GetList(string getSql,
+        protected Task<ListResp<TType>> GetList(string getSql,object paras)
+        {
+            return GetList<TType>(getSql, paras);
+        }
+
+        /// <summary>
+        ///   列表查询
+        /// </summary>
+        /// <param name="getSql">查询语句</param>
+        /// <param name="paras">参数内容</param>
+        /// <returns></returns>
+        protected virtual async Task<ListResp<RType>> GetList<RType>(string getSql,
             object paras)
         {
             return await ExecuteReadSubAsync(async con =>
             {
-                var list = (await con.QueryAsync<TType>(getSql, paras))?.ToList();
+                var list = (await con.QueryAsync<RType>(getSql, paras))?.ToList();
 
                 return list?.Count > 0
-                    ? new ListResp<TType>(list)
-                    : new ListResp<TType>().WithResp(RespTypes.ObjectNull, "没有查到相关信息！");
+                    ? new ListResp<RType>(list)
+                    : new ListResp<RType>().WithResp(RespTypes.ObjectNull, "没有查到相关信息！");
             });
         }
-
 
         /// <summary>
         ///   列表查询
@@ -234,7 +237,19 @@ namespace OSS.Core.ORM.Mysql.Dapper
         /// <param name="totalSql">查询数量语句，不需要排序,如果为空，则不计算和返回总数信息</param>
         /// <param name="paras">参数内容</param>
         /// <returns></returns>
-        protected virtual async Task<PageListResp<TType>> GetPageList(string selectSql, object paras,
+        protected  Task<PageListResp<TType>> GetPageList(string selectSql, object paras,
+            string totalSql = null)
+        {
+            return GetPageList<TType>(selectSql, paras, totalSql);
+        }
+        /// <summary>
+        ///   列表查询
+        /// </summary>
+        /// <param name="selectSql">查询语句，包含排序等</param>
+        /// <param name="totalSql">查询数量语句，不需要排序,如果为空，则不计算和返回总数信息</param>
+        /// <param name="paras">参数内容</param>
+        /// <returns></returns>
+        protected virtual async Task<PageListResp<RType>> GetPageList<RType>(string selectSql, object paras,
             string totalSql = null)
         {
             return await ExecuteReadSubAsync(async con =>
@@ -244,11 +259,11 @@ namespace OSS.Core.ORM.Mysql.Dapper
                 if (!string.IsNullOrEmpty(totalSql))
                 {
                     total = await con.ExecuteScalarAsync<long>(totalSql, paras);
-                    if (total <= 0) return new PageListResp<TType>().WithResp(RespTypes.ObjectNull, "没有查到相关信息！");
+                    if (total <= 0) return new PageListResp<RType>().WithResp(RespTypes.ObjectNull, "没有查到相关信息！");
                 }
 
-                var list = await con.QueryAsync<TType>(selectSql, paras);
-                return new PageListResp<TType>(total, list.ToList());
+                var list = await con.QueryAsync<RType>(selectSql, paras);
+                return new PageListResp<RType>(total, list.ToList());
             });
         }
 
@@ -264,7 +279,7 @@ namespace OSS.Core.ORM.Mysql.Dapper
         /// <returns></returns>
         protected Task<RespType> ExecuteWriteAsync<RespType>(Func<IDbConnection, Task<RespType>> func)
             where RespType : Resp, new()
-            => Execute(func, true);
+            => ExecuteAsync(func, true);
 
         /// <summary>
         ///  执行读操作，返回具体类型，自动包装成Resp结果实体
@@ -272,14 +287,14 @@ namespace OSS.Core.ORM.Mysql.Dapper
         /// <typeparam name="RespParaType"></typeparam>
         /// <param name="func"></param>
         /// <returns></returns>
-        protected Task<Resp<RespParaType>>
-            ExecuteReadAsync<RespParaType>(Func<IDbConnection, Task<RespParaType>> func) => Execute(async con =>
-        {
-            var res = await func(con);
-            return res != null
-                ? new Resp<RespParaType>(res)
-                : new Resp<RespParaType>().WithResp(RespTypes.ObjectNull, "未发现相关数据！");
-        }, false);
+        protected Task<Resp<RespParaType>> ExecuteReadAsync<RespParaType>(Func<IDbConnection, Task<RespParaType>> func)
+            => ExecuteAsync(async con =>
+            {
+                var res = await func(con);
+                return res != null
+                    ? new Resp<RespParaType>(res)
+                    : new Resp<RespParaType>().WithResp(RespTypes.ObjectNull, "未发现相关数据！");
+            }, false);
 
         /// <summary>
         /// 执行读操作，直接返回继承自Resp实体
@@ -289,15 +304,15 @@ namespace OSS.Core.ORM.Mysql.Dapper
         /// <returns></returns>
         protected async Task<SubRespType> ExecuteReadSubAsync<SubRespType>(Func<IDbConnection, Task<SubRespType>> func)
             where SubRespType : Resp, new()
-            => await Execute(func, false);
+            => await ExecuteAsync(func, false);
 
-        private async Task<RType> Execute<RType>(Func<IDbConnection, Task<RType>> func, bool isWrite)
+        private async Task<RType> ExecuteAsync<RType>(Func<IDbConnection, Task<RType>> func, bool isWrite)
             where RType : Resp, new()
         {
             RType t;
             try
             {
-                using (var con = new MySqlConnection(isWrite ? _writeConnectionString : _readConnectionString))
+                using (var con = GetDbConnection(isWrite))
                 {
                     t = await func(con);
                 }

@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Npgsql;
 using OSS.Common.BasicMos;
 using OSS.Common.BasicMos.Resp;
 using OSS.Common.Extention;
@@ -49,33 +50,27 @@ namespace OSS.Core.ORM.Tests
 
     public class UserInfoRep : BasePgRep<UserInfoRep, UserInfo,string>
     {
-        private static readonly string connectStr = "";
-
-        public UserInfoRep() : base(connectStr, connectStr)
-        {
-            TableName = "userinfo";
-        }
-
-
         public async Task<Resp> UpdateName(string id, string name)
         {
             var teU=new UserInfo(){id=id,user_name = name};
             return await Update(u => new {teU.user_name}, u => u.id == id);
         }
-        //public async Task<Resp> UpdateName(string id, string name)
-        //{
-        //    var teU = new UserInfo() { id = id, user_name = name };
-        //    return await Update(u => new { teU.user_name }, u => u.id == id, teU);
-        //}
+      
         public async Task<Resp> Get(string id)
         {
             return await Get(u => u.id == id);
         }
 
 
-        //public async Task<Resp> GetList()
-        //{
-        //    return await GetList(u => u.add_time>0);
-        //}
+        protected override string GetTableName()
+        {
+            return "userinfo";
+        }
+
+        private static readonly string connectStr = "";
+        protected override NpgsqlConnection GetDbConnection(bool isWriteOperate)
+        {
+           return new NpgsqlConnection(connectStr);
+        }
     }
 }
