@@ -12,7 +12,6 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
@@ -20,11 +19,10 @@ using System.Text;
 using System.Threading.Tasks;
 using Dapper;
 using OSS.Common.BasicMos.Resp;
-using OSS.Orm.DapperPgsql.OrmExtention;
 
-namespace OSS.Core.ORM.Pgsql.Dapper.OrmExtention
+namespace OSS.Core.ORM.Pgsql.Dapper.OrmExtension
 {
-    internal static class ConnoctionExtention 
+    internal static class ConnoctionExtension 
     {
         #region    插入扩展
 

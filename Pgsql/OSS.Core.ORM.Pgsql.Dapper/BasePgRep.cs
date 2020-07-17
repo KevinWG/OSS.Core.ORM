@@ -23,7 +23,7 @@ using OSS.Common.BasicImpls;
 using OSS.Common.BasicMos;
 using OSS.Common.BasicMos.Enums;
 using OSS.Common.BasicMos.Resp;
-using OSS.Core.ORM.Pgsql.Dapper.OrmExtention;
+using OSS.Core.ORM.Pgsql.Dapper.OrmExtension;
 using OSS.Tools.Log;
 
 namespace OSS.Core.ORM.Pgsql.Dapper

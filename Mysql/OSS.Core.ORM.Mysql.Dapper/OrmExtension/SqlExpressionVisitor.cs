@@ -17,7 +17,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 
-namespace OSS.Orm.DapperPgsql.OrmExtention
+namespace OSS.Core.ORM.Mysql.Dapper.OrmExtension
 {
     public class SqlExpressionVisitor
     {
@@ -199,7 +199,7 @@ namespace OSS.Orm.DapperPgsql.OrmExtention
             var value = c.Value ?? "null";
             if (flag.is_right)
             {
-                var paraName = GetCustomParaName(flag.para_preToken); // flag.GetCustomParaName();
+                var paraName = GetCustomParaName(flag.para_pretoken); // flag.GetCustomParaName();
                 flag.Append(paraName,true);
 
                 if (c.Type.IsEnum)
@@ -280,6 +280,8 @@ namespace OSS.Orm.DapperPgsql.OrmExtention
                 Visit(Expression.Constant(value), flag);
             }
         }
+
+
 
         protected virtual void VisitConditional(ConditionalExpression conditionalExpression)
         {
@@ -419,7 +421,7 @@ namespace OSS.Orm.DapperPgsql.OrmExtention
         /// <summary>
         ///  参数辨识符号
         /// </summary>
-        public string para_preToken { get; } = "@";
+        public string para_pretoken { get; } = "@";
 
         /// <summary>
         ///  对应的SQL语句
@@ -457,7 +459,7 @@ namespace OSS.Orm.DapperPgsql.OrmExtention
         /// <returns></returns>
         public virtual string GetParaName(string name)
         {
-            return string.Concat(para_preToken, name);
+            return string.Concat(para_pretoken, name);
         }
 
 
@@ -469,7 +471,7 @@ namespace OSS.Orm.DapperPgsql.OrmExtention
         /// <returns></returns>
         public virtual string GetColName(string name)
         {
-            return name;
+            return string.Concat('`', name, '`');
         }
 
 
@@ -488,6 +490,9 @@ namespace OSS.Orm.DapperPgsql.OrmExtention
 
         #endregion
     }
+
+
+
 
     public enum SqlVistorType
     {
