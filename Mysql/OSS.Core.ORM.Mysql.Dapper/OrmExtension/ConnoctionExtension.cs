@@ -161,7 +161,7 @@ namespace OSS.Core.ORM.Mysql.Dapper.OrmExtension
 
             string sql;
             if (exp == null)
-                sql = " WHERE id=@id";
+                throw new ArgumentNullException("whereExp", "where表达式不能为空！");
             else
             {
                 var whereFlag = new SqlVistorFlag(SqlVistorType.Where);

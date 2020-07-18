@@ -81,12 +81,19 @@ namespace OSS.Core.ORM.Mysql.Dapper
 
         /// <summary>
         /// 部分字段的更新
+        ///     参考用法： Update
         /// </summary>
-        ///  <param name="updateExp">更新字段,示例：
-        ///  u=>new{mo.Name,....} Or u=> new{ Name="",....}</param>
-        /// <param name="whereExp">判断条件 示例：
-        /// w=>w.id==1  , 如果为空默认根据Id判断</param>
-        /// <param name="mo"></param>
+        ///  <param name="updateExp">
+        /// 更新字段,示例：
+        ///  u=>new{ u.Name, ....},这样生成的参数是同名参数，会从mo对象同名属性中取值
+        ///  或者 u=> new{ Name="",mo.Status,....}，这样生成的是匿名参数，参数值即对象本身的值。
+        ///  注解：表达式在解析过程中并无实际入参，所以表达式中（TType）u 下的属性仅做类型推断，无实际值，需要通过mo参数传入，where表达式处理相同。 
+        /// </param>
+        /// <param name="whereExp">
+        /// 判断条件 示例：
+        ///     w=>w.id==1  , 如果为空默认根据Id判断
+        /// </param>
+        /// <param name="mo">update和where表达式中参数值</param>
         /// <returns></returns>
         protected virtual Task<Resp> Update(Expression<Func<TType, object>> updateExp,
             Expression<Func<TType, bool>> whereExp, object mo = null)
