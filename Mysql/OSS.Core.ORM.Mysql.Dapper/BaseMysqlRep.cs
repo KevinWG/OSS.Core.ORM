@@ -81,7 +81,7 @@ namespace OSS.Core.ORM.Mysql.Dapper
 
         /// <summary>
         /// 部分字段的更新
-        ///     参考用法： Update
+        ///     参考用法: Update(u => new {u.status}, u => u.id == 1111 ,new{ status });
         /// </summary>
         ///  <param name="updateExp">
         /// 更新字段,示例：
