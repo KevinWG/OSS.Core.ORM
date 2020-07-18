@@ -28,22 +28,22 @@ namespace OSS.Core.ORM.Tests
         [TestMethod]
         public void Test1()
         {
-            var id = NumHelper.SnowNum().ToString();
-            var time = DateTime.Now.ToUtcSeconds();
+            //var id = NumHelper.SnowNum().ToString();
+            //var time = DateTime.Now.ToUtcSeconds();
 
-            var addRes = MysqlUserInfoRep.Instance.Add(new UserInfo()
-            {
-                id = id,
-                user_name = $"test_name_{id}"
-            }).Result;
-            Assert.IsTrue(addRes.IsSuccess());
+            //var addRes = MysqlUserInfoRep.Instance.Add(new UserInfo()
+            //{
+            //    id = id,
+            //    user_name = $"test_name_{id}"
+            //}).Result;
+            //Assert.IsTrue(addRes.IsSuccess());
 
-            var updateRes = MysqlUserInfoRep.Instance.UpdateName(id,$"test_update_name{id}").Result;
-            Assert.IsTrue(updateRes.IsSuccess());
+            //var updateRes = MysqlUserInfoRep.Instance.UpdateName(id,$"test_update_name{id}").Result;
+            //Assert.IsTrue(updateRes.IsSuccess());
 
 
-            var getRes = MysqlUserInfoRep.Instance.Get(id).Result;
-            Assert.IsTrue(getRes.IsSuccess());
+            //var getRes = MysqlUserInfoRep.Instance.Get(id).Result;
+            //Assert.IsTrue(getRes.IsSuccess());
 
             //var getListRes = UserInfoRep.Instance.GetList().Result;
             //Assert.True(getListRes.IsSuccess());

@@ -126,7 +126,7 @@ namespace OSS.Core.ORM.Mysql.Dapper
         public virtual Task<Resp> SoftDeleteById(string id)
         {
             var sql     = string.Concat("UPDATE ", TableName, " SET status=@status WHERE id=@id");
-            var dirPara = new Dictionary<string, object> {{"@id", id}, {"@status", (int) CommonStatus.Delete}};
+            var dirPara = new Dictionary<string, object> {{"@id", id}, {"@status", (int) CommonStatus.Deleted}};
 
             return SoftDelete(sql, dirPara);
         }
@@ -138,7 +138,7 @@ namespace OSS.Core.ORM.Mysql.Dapper
         /// <returns></returns>
         protected virtual Task<Resp> SoftDelete(Expression<Func<TType, bool>> whereExp)
         {
-            return Update(m => new {status = CommonStatus.Delete}, whereExp);
+            return Update(m => new {status = CommonStatus.Deleted }, whereExp);
         }
 
         /// <summary>
