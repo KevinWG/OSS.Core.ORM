@@ -142,8 +142,7 @@ namespace OSS.Core.ORM.Mysql.Dapper
         public virtual Task<Resp> SoftDeleteById(string id)
         {
             var whereSql = "id=@id";
-            var dirPara = new Dictionary<string, object> {{"@id", id}, {"@status", (int) CommonStatus.Deleted}};
-
+            var dirPara = new { id};
             return SoftDelete(whereSql, dirPara);
         }
 
@@ -161,15 +160,19 @@ namespace OSS.Core.ORM.Mysql.Dapper
         /// 软删除，直接修改状态
         /// </summary>
         /// <param name="whereSql"></param>
-        /// <param name="paras"></param>
+        /// <param name="whereParas"></param>
         /// <returns></returns>
-        protected virtual Task<Resp> SoftDelete(string whereSql, object paras)
+        protected virtual Task<Resp> SoftDelete(string whereSql , object whereParas = null)
         {
+            if (string.IsNullOrEmpty(whereSql))
+            {
+                return Task.FromResult(new Resp(RespTypes.ParaError, "where语句不能为空！"));
+            }
             return ExecuteWriteAsync(async con =>
             {
                 var sql = $"UPDATE {TableName} SET status={(int)CommonStatus.Deleted} WHERE {whereSql}";
 
-                var rows = await con.ExecuteAsync(sql, paras);
+                var rows = await con.ExecuteAsync(sql, whereParas);
                 return rows > 0 ? new Resp() : new Resp().WithResp(RespTypes.OperateFailed, "soft delete Failed!");
             });
         }
