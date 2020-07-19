@@ -12,6 +12,7 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
@@ -20,32 +21,36 @@ using System.Threading.Tasks;
 using Dapper;
 using OSS.Common.BasicMos.Resp;
 
-namespace OSS.Core.ORM.Mysql.Dapper.OrmExtension
+namespace OSS.Core.ORM.Pgsql.Dapper.OrmExtension
 {
-    internal static class ConnoctionExtension 
+    internal static class ConnectionExtension 
     {
         #region    插入扩展
 
-        public static  Task<int> Insert<TType>(this IDbConnection con, string tableName, TType mo)
-           // where TType : BaseMo
+        public static Task<int> Insert<TType>(this IDbConnection con, string tableName, TType mo)
+
         {
             if (string.IsNullOrEmpty(tableName))
                 tableName = mo.GetType().Name;
 
-            var sql = GetInserSql<TType>(tableName);
+            var sql = GetInsertSql<TType>(tableName);
 
-             return con.ExecuteAsync(sql, mo);
-
-            //var resId = string.Empty;
-            //if (id > 0)
-            //    resId = mo.id;
-
-            //return id > 0 ? new Resp() : new Resp(RespTypes.AddFail, "添加操作失败！");
+            return con.ExecuteAsync(sql, mo);
         }
 
-    
 
-        private static string GetInserSql<TType>(string tableName)
+        public static Task<int> InsertList<TType>(this IDbConnection con, string tableName, IList<TType> list)
+        {
+            if (string.IsNullOrEmpty(tableName))
+                tableName = typeof(TType).Name;
+
+            var sql = GetInsertSql<TType>(tableName);
+
+            return con.ExecuteAsync(sql, list);
+        }
+
+
+        private static string GetInsertSql<TType>(string tableName)
         {
             //  todo 未来针对类型，添加语句缓存
             var properties = typeof(TType).GetProperties();
@@ -74,22 +79,21 @@ namespace OSS.Core.ORM.Mysql.Dapper.OrmExtension
                 }
                 else
                     isStart = true;
-                sqlCols.Append("`").Append(propertyInfo.Name).Append("`");
+
+                sqlCols.Append(propertyInfo.Name);
                 sqlValues.Append("@").Append(propertyInfo.Name);
             }
             sqlCols.Append(")");
             sqlValues.Append(")");
             sqlCols.Append(sqlValues);
-
-            //if (haveAuto)
-            //    sqlCols.Append(";SELECT LAST_INSERT_ID();");
+            
             return sqlCols.ToString();
         }
         #endregion
 
         internal static async Task<Resp> UpdatePartial<TType>(this IDbConnection con, string tableName,
             Expression<Func<TType, object>> update, Expression<Func<TType, bool>> where, object mo)
-            //where TType : BaseMo<IdType>
+            //where TType : BaseMo
         {
             if (string.IsNullOrEmpty(tableName))
                 tableName = typeof(TType).Name;
@@ -100,9 +104,9 @@ namespace OSS.Core.ORM.Mysql.Dapper.OrmExtension
             var whereSql = GetVisitExpressSql(visitor, where, SqlVistorType.Where);
             var sql = string.Concat("UPDATE ", tableName, " SET ", updateSql, whereSql);
 
-            var paras = GetExcuteParas(mo, visitor);
+            var paras = GetExecuteParas(mo, visitor);
             var row = await con.ExecuteAsync(sql, paras);
-            return row > 0 ? new Resp() : new Resp().WithResp(RespTypes.OperateFailed, "更新失败!");
+            return row > 0 ? new Resp() : new Resp().WithResp(RespTypes.OperateFailed, "操作失败！");
         }
         
         /// <summary>
@@ -122,7 +126,7 @@ namespace OSS.Core.ORM.Mysql.Dapper.OrmExtension
             var whereSql = GetVisitExpressSql(sqlVisitor, whereExp, SqlVistorType.Where);
 
             var sqlStr = string.Concat("SELECT * FROM ", tableName, whereSql);
-            var paras = GetExcuteParas(null, sqlVisitor);
+            var paras = GetExecuteParas(null, sqlVisitor);
 
             return await con.QuerySingleOrDefaultAsync<TType>(sqlStr, paras);
         }
@@ -135,13 +139,13 @@ namespace OSS.Core.ORM.Mysql.Dapper.OrmExtension
             var whereSql = GetVisitExpressSql(sqlVisitor, whereExp, SqlVistorType.Where);
 
             var sqlStr = string.Concat("SELECT * FROM ", tableName, whereSql);
-            var paras = GetExcuteParas(null, sqlVisitor);
+            var paras = GetExecuteParas(null, sqlVisitor);
 
             var listRes = (await con.QueryAsync<TType>(sqlStr, paras)).ToList();
 
-            return listRes.Count == 0 
-                ? new ListResp<TType>().WithResp(RespTypes.ObjectNull, "没有查到相关信息！") 
-                : new ListResp<TType>(listRes.ToList()) ;
+            return listRes.Count == 0
+                ? new ListResp<TType>().WithResp(RespTypes.ObjectNull, "没有查到相关信息！")
+                : new ListResp<TType>(listRes.ToList());
         }
 
         /// <summary>
@@ -161,7 +165,7 @@ namespace OSS.Core.ORM.Mysql.Dapper.OrmExtension
 
             string sql;
             if (exp == null)
-                throw new ArgumentNullException("whereExp", "where表达式不能为空！");
+               throw new ArgumentNullException("whereExp","where表达式不能为空！");
             else
             {
                 var whereFlag = new SqlVistorFlag(SqlVistorType.Where);
@@ -172,7 +176,7 @@ namespace OSS.Core.ORM.Mysql.Dapper.OrmExtension
             return sql;
         }
 
-        private static object GetExcuteParas(object mo, SqlExpressionVisitor visitor)
+        private static object GetExecuteParas(object mo, SqlExpressionVisitor visitor)
         {
             if (!visitor.parameters.Any())
                 return mo;

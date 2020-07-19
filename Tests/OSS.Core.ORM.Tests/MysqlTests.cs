@@ -1,9 +1,13 @@
 using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using MySql.Data.MySqlClient;
+using Npgsql;
 using OSS.Common.BasicMos.Resp;
-using OSS.Common.Extention;
 using OSS.Common.Helpers;
+using OSS.Core.ORM.Mysql.Dapper;
 using OSS.Core.ORM.Mysql.Dapper.OrmExtension;
 
 namespace OSS.Core.ORM.Tests
@@ -28,15 +32,20 @@ namespace OSS.Core.ORM.Tests
         [TestMethod]
         public void Test1()
         {
-            //var id = NumHelper.SnowNum().ToString();
-            //var time = DateTime.Now.ToUtcSeconds();
+            var userList = new List<UserInfo>();
+            for (int i = 0; i < 3; i++)
+            {
+                var id = NumHelper.SnowNum().ToString();
 
-            //var addRes = MysqlUserInfoRep.Instance.Add(new UserInfo()
-            //{
-            //    id = id,
-            //    user_name = $"test_name_{id}"
-            //}).Result;
-            //Assert.IsTrue(addRes.IsSuccess());
+                userList.Add(new UserInfo()
+                {
+                    id = id,
+                    name = $"test_name_{id}"
+                });
+            }
+
+            var addRes = MysqlUserInfoRep.Instance.AddList(userList).Result;
+            Assert.IsTrue(addRes.IsSuccess());
 
             //var updateRes = MysqlUserInfoRep.Instance.UpdateName(id,$"test_update_name{id}").Result;
             //Assert.IsTrue(updateRes.IsSuccess());
@@ -50,11 +59,36 @@ namespace OSS.Core.ORM.Tests
         }
     }
 
-    public class MysqlUserInfoRep : UserInfoRep
+    public class MysqlUserInfoRep : BaseMysqlRep<MysqlUserInfoRep, UserInfo, string>
     {
+        protected string _connectStr ;
+    
         public MysqlUserInfoRep()
         {     
-            _connectStr = "server=127.0.0.1;database=oss.core;uid=root;pwd=123456;charset=utf8mb4"; 
+            _connectStr = "server=127.0.0.1;database=test_database;uid=root;pwd=123456;"; 
+        }
+
+
+        public async Task<Resp> UpdateName(string id, string name)
+        {
+            var teU = new UserInfo() { id = id, name = name };
+            return await Update(u => new { user_name = teU.name }, u => u.id == id);
+        }
+
+        public async Task<Resp> Get(string id)
+        {
+            return await Get(u => u.id == id);
+        }
+
+
+        protected override string GetTableName()
+        {
+            return "user_info";
+        }
+
+        protected override MySqlConnection GetDbConnection(bool isWriteOperate)
+        {
+            return new MySqlConnection(_connectStr);
         }
     }
 

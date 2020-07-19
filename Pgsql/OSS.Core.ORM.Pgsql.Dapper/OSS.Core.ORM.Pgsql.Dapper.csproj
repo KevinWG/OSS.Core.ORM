@@ -7,8 +7,8 @@
     <PackageIconUrl>http://img1.osscore.cn/static/oss_net.png</PackageIconUrl>
     <Authors>OSSCore</Authors>
     <Description>Pgsql的Dapper扩展</Description>
-    <Version>1.2.2</Version>
-    <PackageReleaseNotes>完善注释</PackageReleaseNotes>
+    <Version>1.2.3</Version>
+    <PackageReleaseNotes>添加批量添加操作</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

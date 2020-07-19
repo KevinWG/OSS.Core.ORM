@@ -75,6 +75,22 @@ namespace OSS.Core.ORM.Pgsql.Dapper
             return res;
         }
 
+        /// <summary>
+        ///   插入数据
+        /// </summary>
+        /// <param name="list"></param>
+        /// <returns></returns>
+        public virtual async Task<Resp> AddList(IList<TType> list)
+        {
+            var res = await ExecuteWriteAsync(async con =>
+            {
+                var row = await con.InsertList(TableName, list);
+                return row > 0 ? new Resp() : new Resp().WithResp(RespTypes.OperateFailed, "添加失败!");
+            });
+            return res;
+        }
+
+
         #endregion
 
         #region Update

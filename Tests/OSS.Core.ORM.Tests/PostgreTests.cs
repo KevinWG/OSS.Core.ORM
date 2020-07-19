@@ -34,12 +34,6 @@ namespace OSS.Core.ORM.Tests
         }
     }
 
-    public class PgUserInfoRep : UserInfoRep
-    {
-        public PgUserInfoRep()
-        {
-            _connectStr = "";
-        }
-    }
+   
 
 }
