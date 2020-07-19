@@ -142,10 +142,10 @@ namespace OSS.Core.ORM.Pgsql.Dapper
         /// <returns></returns>
         public virtual Task<Resp> SoftDeleteById(string id)
         {
-            var sql     = string.Concat("UPDATE ", TableName, " SET status=@status WHERE id=@id");
-            var dirPara = new Dictionary<string, object> {{"@id", id}, {"@status", (int) CommonStatus.Deleted } };
+            var whereSql = "id=@id";
+            var dirPara = new Dictionary<string, object> { { "@id", id }, { "@status", (int)CommonStatus.Deleted } };
 
-            return SoftDelete(sql, dirPara);
+            return SoftDelete(whereSql, dirPara);
         }
 
         /// <summary>
@@ -155,19 +155,21 @@ namespace OSS.Core.ORM.Pgsql.Dapper
         /// <returns></returns>
         protected virtual Task<Resp> SoftDelete(Expression<Func<TType, bool>> whereExp)
         {
-            return Update(m => new {status = CommonStatus.Deleted}, whereExp);
+            return Update(m => new { status = CommonStatus.Deleted }, whereExp);
         }
 
         /// <summary>
         /// 软删除，直接修改状态
         /// </summary>
-        /// <param name="sql"></param>
+        /// <param name="whereSql"></param>
         /// <param name="paras"></param>
         /// <returns></returns>
-        protected virtual Task<Resp> SoftDelete(string sql, object paras)
+        protected virtual Task<Resp> SoftDelete(string whereSql, object paras)
         {
             return ExecuteWriteAsync(async con =>
             {
+                var sql = $"UPDATE {TableName} SET status={(int)CommonStatus.Deleted} WHERE {whereSql}";
+
                 var rows = await con.ExecuteAsync(sql, paras);
                 return rows > 0 ? new Resp() : new Resp().WithResp(RespTypes.OperateFailed, "soft delete Failed!");
             });
