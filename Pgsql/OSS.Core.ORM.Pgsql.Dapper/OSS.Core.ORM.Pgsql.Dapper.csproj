@@ -7,8 +7,8 @@
     <PackageIconUrl>http://img1.osscore.cn/static/oss_net.png</PackageIconUrl>
     <Authors>OSSCore</Authors>
     <Description>Pgsql的Dapper扩展</Description>
-    <Version>1.2.3.1</Version>
-    <PackageReleaseNotes>优化软删除方法</PackageReleaseNotes>
+    <Version>1.2.3.2</Version>
+    <PackageReleaseNotes></PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -18,8 +18,8 @@
 
   <ItemGroup>
     <PackageReference Include="Dapper" Version="2.0.35" />
-    <PackageReference Include="Npgsql" Version="4.1.3.1" />
-    <PackageReference Include="OSS.Common" Version="2.3.1.5" />
+    <PackageReference Include="Npgsql" Version="4.1.4" />
+    <PackageReference Include="OSS.Common" Version="2.3.1.6" />
     <PackageReference Include="OSS.Tools.Log" Version="1.1.2" />
   </ItemGroup>
 
