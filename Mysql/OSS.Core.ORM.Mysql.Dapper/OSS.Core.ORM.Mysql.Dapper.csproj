@@ -7,9 +7,9 @@
     <PackageIconUrl>http://img1.osscore.cn/static/oss_net.png</PackageIconUrl>
     <Description>Mysql的Dapper扩展</Description>
     <Authors>OSSCore</Authors>
-    <AssemblyVersion>1.2.3.2</AssemblyVersion>
-    <Version>1.2.3.2</Version>
-    <PackageReleaseNotes></PackageReleaseNotes>
+    <AssemblyVersion>1.2.3.3</AssemblyVersion>
+    <Version>1.2.3.3</Version>
+    <PackageReleaseNotes>优化get方法</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

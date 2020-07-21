@@ -190,10 +190,10 @@ namespace OSS.Core.ORM.Pgsql.Dapper
         /// <returns></returns>
         public virtual Task<Resp<TType>> GetById(string id)
         {
-            const string whereSql = " WHERE id=@id";
-            var          dirPara  = new Dictionary<string, object> { { "@id", id } };
+            var sql     = string.Concat("select * from ", TableName, " WHERE id=@id");
+            var dirPara = new Dictionary<string, object> { { "@id", id } };
 
-            return Get(whereSql, dirPara);
+            return Get<TType>(sql, dirPara);
         }
 
         /// <summary>
@@ -207,15 +207,13 @@ namespace OSS.Core.ORM.Pgsql.Dapper
         /// <summary>
         /// 通过sql语句获取实体
         /// </summary>
-        /// <param name="whereSql"> 条件sql语句</param>
+        /// <param name="getSql"> 查询sql语句</param>
         /// <param name="para"></param>
         /// <returns></returns>
-        protected virtual Task<Resp<TType>> Get(string whereSql, object para)
+        protected virtual Task<Resp<RType>> Get<RType>(string getSql, object para)
         {
-            var sql = string.Concat("select * from ", TableName, " ", whereSql);
-            return ExecuteReadAsync(con => con.QuerySingleOrDefaultAsync<TType>(sql, para));
+            return ExecuteReadAsync(con => con.QuerySingleOrDefaultAsync<RType>(getSql, para));
         }
-
         #endregion
 
         #region Get(Page)List
