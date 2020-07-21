@@ -352,6 +352,7 @@ namespace OSS.Core.ORM.Mysql.Dapper
                     "DapperRep_Mysql");
                 t = new RType
                 {
+                    sys_ret =  (int) SysRespTypes.ApplicationError,
                     ret = (int) RespTypes.InnerError,
                     msg = isWrite ? "数据操作出错！" : "数据读取错误"
                 };

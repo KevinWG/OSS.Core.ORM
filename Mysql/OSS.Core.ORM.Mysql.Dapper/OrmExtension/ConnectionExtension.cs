@@ -104,7 +104,7 @@ namespace OSS.Core.ORM.Mysql.Dapper.OrmExtension
             var whereSql = GetVisitExpressSql(visitor, where, SqlVistorType.Where);
             var sql = string.Concat("UPDATE ", tableName, " SET ", updateSql, whereSql);
 
-            var paras = GetExcuteParas(mo, visitor);
+            var paras = GetExecuteParas(mo, visitor);
             var row = await con.ExecuteAsync(sql, paras);
             return row > 0 ? new Resp() : new Resp().WithResp(RespTypes.OperateFailed, "更新失败!");
         }
@@ -126,7 +126,7 @@ namespace OSS.Core.ORM.Mysql.Dapper.OrmExtension
             var whereSql = GetVisitExpressSql(sqlVisitor, whereExp, SqlVistorType.Where);
 
             var sqlStr = string.Concat("SELECT * FROM ", tableName, whereSql);
-            var paras = GetExcuteParas(null, sqlVisitor);
+            var paras = GetExecuteParas(null, sqlVisitor);
 
             return await con.QuerySingleOrDefaultAsync<TType>(sqlStr, paras);
         }
@@ -139,7 +139,7 @@ namespace OSS.Core.ORM.Mysql.Dapper.OrmExtension
             var whereSql = GetVisitExpressSql(sqlVisitor, whereExp, SqlVistorType.Where);
 
             var sqlStr = string.Concat("SELECT * FROM ", tableName, whereSql);
-            var paras = GetExcuteParas(null, sqlVisitor);
+            var paras = GetExecuteParas(null, sqlVisitor);
 
             var listRes = (await con.QueryAsync<TType>(sqlStr, paras)).ToList();
 
@@ -176,7 +176,7 @@ namespace OSS.Core.ORM.Mysql.Dapper.OrmExtension
             return sql;
         }
 
-        private static object GetExcuteParas(object mo, SqlExpressionVisitor visitor)
+        private static object GetExecuteParas(object mo, SqlExpressionVisitor visitor)
         {
             if (!visitor.parameters.Any())
                 return mo;

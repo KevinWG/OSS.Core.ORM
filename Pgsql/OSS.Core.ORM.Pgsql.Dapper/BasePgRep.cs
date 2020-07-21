@@ -348,6 +348,7 @@ namespace OSS.Core.ORM.Pgsql.Dapper
                     "DapperRep_PG");
                 t = new RType
                 {
+                    sys_ret = (int)SysRespTypes.ApplicationError,
                     ret = (int) RespTypes.InnerError,
                     msg = isWrite ? "数据写入出错！" : "数据读取出错！"
                 };
