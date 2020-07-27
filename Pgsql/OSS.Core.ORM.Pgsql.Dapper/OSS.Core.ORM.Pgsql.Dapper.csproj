@@ -7,8 +7,8 @@
     <PackageIconUrl>http://img1.osscore.cn/static/oss_net.png</PackageIconUrl>
     <Authors>OSSCore</Authors>
     <Description>Pgsql的Dapper扩展</Description>
-    <Version>1.2.3.3</Version>
-    <PackageReleaseNotes>优化get方法</PackageReleaseNotes>
+    <Version>1.2.3.5</Version>
+    <PackageReleaseNotes>移除多余依赖引用</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -20,7 +20,6 @@
     <PackageReference Include="Dapper" Version="2.0.35" />
     <PackageReference Include="Npgsql" Version="4.1.4" />
     <PackageReference Include="OSS.Common" Version="2.3.1.6" />
-    <PackageReference Include="OSS.Tools.Log" Version="1.1.2" />
   </ItemGroup>
 
 </Project>

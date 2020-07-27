@@ -24,7 +24,6 @@ using OSS.Common.BasicMos;
 using OSS.Common.BasicMos.Enums;
 using OSS.Common.BasicMos.Resp;
 using OSS.Core.ORM.Pgsql.Dapper.OrmExtension;
-using OSS.Tools.Log;
 
 namespace OSS.Core.ORM.Pgsql.Dapper
 {
@@ -329,28 +328,35 @@ namespace OSS.Core.ORM.Pgsql.Dapper
         protected async Task<SubRespType> ExecuteReadSubAsync<SubRespType>(Func<IDbConnection, Task<SubRespType>> func) where SubRespType : Resp, new()
             => await ExecuteAsync(func, false);
 
-        private async Task<RType> ExecuteAsync<RType>(Func<IDbConnection, Task<RType>> func, bool isWrite)
+        /// <summary>
+        ///  最终执行操作
+        /// </summary>
+        /// <typeparam name="RType"></typeparam>
+        /// <param name="func"></param>
+        /// <param name="isWrite"></param>
+        /// <returns></returns>
+        protected virtual async Task<RType> ExecuteAsync<RType>(Func<IDbConnection, Task<RType>> func, bool isWrite)
             where RType : Resp, new()
         {
             RType t;
-            try
-            {
+            //try
+            //{
                 using (var con = GetDbConnection(isWrite))
                 {
                     t = await func(con);
                 }
-            }
-            catch (Exception e)
-            {
-                LogHelper.Error(string.Concat("数据库操作错误,仓储表名：", TableName, "，详情：", e.Message, "\r\n", e.StackTrace), "DataRepConnectionError",
-                    "DapperRep_PG");
-                t = new RType
-                {
-                    sys_ret = (int)SysRespTypes.ApplicationError,
-                    ret = (int) RespTypes.InnerError,
-                    msg = isWrite ? "数据写入出错！" : "数据读取出错！"
-                };
-            }
+            //}
+            //catch (Exception e)
+            //{
+            //    LogHelper.Error(string.Concat("数据库操作错误,仓储表名：", TableName, "，详情：", e.Message, "\r\n", e.StackTrace), "DataRepConnectionError",
+            //        "DapperRep_PG");
+            //    t = new RType
+            //    {
+            //        sys_ret = (int)SysRespTypes.ApplicationError,
+            //        ret = (int) RespTypes.InnerError,
+            //        msg = isWrite ? "数据写入出错！" : "数据读取出错！"
+            //    };
+            //}
             return t ?? new RType() { ret = (int) RespTypes.ObjectNull, msg = "未发现对应结果" };
         }
 
