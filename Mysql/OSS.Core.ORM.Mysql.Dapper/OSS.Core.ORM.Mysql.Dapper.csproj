@@ -8,19 +8,19 @@
     <Description>Mysql的Dapper扩展</Description>
     <Authors>OSSCore</Authors>
     <AssemblyVersion>1.2.3.5</AssemblyVersion>
-    <Version>1.2.3.5</Version>
+    <Version>1.2.3.6</Version>
     <PackageReleaseNotes>移除多余依赖引用</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DocumentationFile>bin\Release\netstandard2.0\OSS.Core.ORM.Mysql.Dapper.xml</DocumentationFile>
-    <OutputPath>bin\Release\netstandard2.0\</OutputPath>
+    <DocumentationFile>\OSS.Core.ORM.Mysql.Dapper.xml</DocumentationFile>
+    <OutputPath></OutputPath>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Dapper" Version="2.0.35" />
     <PackageReference Include="MySql.Data" Version="8.0.21" />
-    <PackageReference Include="OSS.Common" Version="2.3.1.6" />
+    <PackageReference Include="OSS.Common" Version="2.3.2.5" />
   </ItemGroup>
 
 </Project>

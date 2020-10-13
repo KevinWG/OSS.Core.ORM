@@ -59,17 +59,17 @@ namespace OSS.Core.ORM.Pgsql.Dapper
         /// </summary>
         /// <param name="mo"></param>
         /// <returns></returns>
-        public virtual async Task<IdResp<IdType>> Add(TType mo)
+        public virtual async Task<Resp<IdType>> Add(TType mo)
         {
             var res = await ExecuteWriteAsync(async con =>
             {
                 var row = await con.Insert(TableName, mo);
-                return row > 0 ? new IdResp<IdType>() 
-                    : new IdResp<IdType>().WithResp(RespTypes.OperateFailed, "添加失败!");
+                return row > 0 ? new Resp<IdType>() 
+                    : new Resp<IdType>().WithResp(RespTypes.OperateFailed, "添加失败!");
             });
             if (res.IsSuccess())
             {
-                res.id = mo.id;
+                res.data = mo.id;
             }
             return res;
         }
