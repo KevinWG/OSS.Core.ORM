@@ -117,17 +117,17 @@ namespace OSS.Core.ORM.Mysql.Dapper
         /// <summary>
         ///  直接使用语句更新操作
         /// </summary>
-        /// <param name="updateSql"></param>
+        /// <param name="updateColNamesSql"></param>
         /// <param name="whereSql"></param>
         /// <param name="para"></param>
         /// <returns></returns>
-        protected virtual Task<Resp> Update(string updateSql, string whereSql, object para = null)
-            => ExecuteWriteAsync(async con =>
-            {
-                var sql = string.Concat("UPDATE ", TableName, " SET ", updateSql, whereSql);
-                var row = await con.ExecuteAsync(sql, para);
-                return row > 0 ? new Resp() : new Resp().WithResp(ret: RespTypes.OperateFailed, "更新失败");
-            });
+        protected virtual Task<Resp> Update(string updateColNamesSql, string whereSql, object para = null)
+        => ExecuteWriteAsync(async con =>
+        {
+            var sql = string.Concat("UPDATE ", TableName, " SET ", updateColNamesSql, " ", whereSql);
+            var row = await con.ExecuteAsync(sql, para);
+            return row > 0 ? new Resp() : new Resp().WithResp(ret: RespTypes.OperateFailed, "更新失败");
+        });
 
         #endregion
 
