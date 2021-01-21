@@ -288,6 +288,9 @@ namespace OSS.Core.ORM.SqlServer.Dapper
                 }
 
                 var list = await con.QueryAsync<RType>(selectSql, paras);
+                if(list==null|| list.Count()==0)
+                    return new PageListResp<RType>().WithResp(RespTypes.ObjectNull, "没有查到相关信息！");
+
                 return new PageListResp<RType>(total, list.ToList());
             });
         }

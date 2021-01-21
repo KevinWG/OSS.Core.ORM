@@ -15,7 +15,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OSS.Core.ORM.Tests", "Tests
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SqlServer", "SqlServer", "{30623BB9-97FF-4C55-A7BB-C46AB40A1AD1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OSS.Core.ORM.SqlServer.Dapper", "SqlServer\OSS.Core.ORM.SqlServer.Dapper\OSS.Core.ORM.SqlServer.Dapper.csproj", "{B4CFDD54-1ADB-46BD-95CB-88B4D840E635}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OSS.Core.ORM.SqlServer.Dapper", "SqlServer\OSS.Core.ORM.SqlServer.Dapper\OSS.Core.ORM.SqlServer.Dapper.csproj", "{B4CFDD54-1ADB-46BD-95CB-88B4D840E635}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,8 +35,8 @@ Global
 		{E79B5A67-189D-4E3F-B3CC-E5CE8EF02A79}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E79B5A67-189D-4E3F-B3CC-E5CE8EF02A79}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E79B5A67-189D-4E3F-B3CC-E5CE8EF02A79}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B4CFDD54-1ADB-46BD-95CB-88B4D840E635}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B4CFDD54-1ADB-46BD-95CB-88B4D840E635}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B4CFDD54-1ADB-46BD-95CB-88B4D840E635}.Debug|Any CPU.ActiveCfg = Release|Any CPU
+		{B4CFDD54-1ADB-46BD-95CB-88B4D840E635}.Debug|Any CPU.Build.0 = Release|Any CPU
 		{B4CFDD54-1ADB-46BD-95CB-88B4D840E635}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B4CFDD54-1ADB-46BD-95CB-88B4D840E635}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
