@@ -19,7 +19,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OSS.Core.ORM.SqlServer.Dapp
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Base", "Base", "{0B310E55-8D50-4963-914F-E960B5DC6F09}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OSS.Core.ORM.DapperBase", "Base\OSS.Core.ORM.DapperBase\OSS.Core.ORM.DapperBase.csproj", "{E7D5B74A-4DCB-4B79-ABA7-A05D93E9FA34}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OSS.Core.ORM.Dapper", "Base\OSS.Core.ORM.DapperBase\OSS.Core.ORM.Dapper.csproj", "{E7D5B74A-4DCB-4B79-ABA7-A05D93E9FA34}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

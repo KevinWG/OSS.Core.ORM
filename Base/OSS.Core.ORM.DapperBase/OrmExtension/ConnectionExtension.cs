@@ -21,21 +21,21 @@ using System.Threading.Tasks;
 using Dapper;
 using OSS.Common.BasicMos.Resp;
 
-namespace OSS.Core.ORM.Mysql.Dapper.OrmExtension
+namespace OSS.Core.ORM.Dapper.OrmExtension
 {
-    internal static class ConnectionExtension 
+    internal static class ConnectionExtension
     {
         #region    插入扩展
 
-        public static  Task<int> Insert<TType>(this IDbConnection con, string tableName, TType mo)
-           // where TType : BaseMo
+        public static Task<int> Insert<TType>(this IDbConnection con, string tableName, TType mo)
+        // where TType : BaseMo
         {
             if (string.IsNullOrEmpty(tableName))
                 tableName = mo.GetType().Name;
 
             var sql = GetInsertSql<TType>(tableName);
 
-             return con.ExecuteAsync(sql, mo);
+            return con.ExecuteAsync(sql, mo);
         }
 
         public static Task<int> InsertList<TType>(this IDbConnection con, string tableName, IList<TType> list)
@@ -58,7 +58,7 @@ namespace OSS.Core.ORM.Mysql.Dapper.OrmExtension
             sqlCols.Append(tableName).Append(" (");
 
             var sqlValues = new StringBuilder(" VALUES (");
-            var isStart = false; 
+            var isStart = false;
 
             foreach (var propertyInfo in properties)
             {
@@ -93,7 +93,7 @@ namespace OSS.Core.ORM.Mysql.Dapper.OrmExtension
 
         public static async Task<Resp> UpdatePartial<TType>(this IDbConnection con, string tableName,
             Expression<Func<TType, object>> update, Expression<Func<TType, bool>> where, object mo)
-            //where TType : BaseMo<IdType>
+        //where TType : BaseMo<IdType>
         {
             if (string.IsNullOrEmpty(tableName))
                 tableName = typeof(TType).Name;
@@ -108,7 +108,7 @@ namespace OSS.Core.ORM.Mysql.Dapper.OrmExtension
             var row = await con.ExecuteAsync(sql, paras);
             return row > 0 ? new Resp() : new Resp().WithResp(RespTypes.OperateFailed, "更新失败!");
         }
-        
+
         /// <summary>
         ///  获取单项扩展
         /// </summary>
@@ -143,9 +143,9 @@ namespace OSS.Core.ORM.Mysql.Dapper.OrmExtension
 
             var listRes = (await con.QueryAsync<TType>(sqlStr, paras)).ToList();
 
-            return listRes.Count == 0 
-                ? new ListResp<TType>().WithResp(RespTypes.ObjectNull, "没有查到相关信息！") 
-                : new ListResp<TType>(listRes.ToList()) ;
+            return listRes.Count == 0
+                ? new ListResp<TType>().WithResp(RespTypes.ObjectNull, "没有查到相关信息！")
+                : new ListResp<TType>(listRes.ToList());
         }
 
         /// <summary>

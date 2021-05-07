@@ -22,9 +22,9 @@ using OSS.Common.BasicImpls;
 using OSS.Common.BasicMos;
 using OSS.Common.BasicMos.Enums;
 using OSS.Common.BasicMos.Resp;
-using OSS.Core.ORM.Mysql.Dapper.OrmExtension;
+using OSS.Core.ORM.Dapper.OrmExtension;
 
-namespace OSS.Core.ORM.Mysql.Dapper
+namespace OSS.Core.ORM.Dapper
 {
     /// <summary>
     /// 仓储层基类
@@ -140,7 +140,7 @@ namespace OSS.Core.ORM.Mysql.Dapper
         public virtual Task<Resp> SoftDeleteById(string id)
         {
             var whereSql = "id=@id";
-            var dirPara = new { id};
+            var dirPara = new { id };
             return SoftDelete(whereSql, dirPara);
         }
 
@@ -151,7 +151,7 @@ namespace OSS.Core.ORM.Mysql.Dapper
         /// <returns></returns>
         protected virtual Task<Resp> SoftDelete(Expression<Func<TType, bool>> whereExp)
         {
-            return Update(m => new {status = CommonStatus.Deleted }, whereExp);
+            return Update(m => new { status = CommonStatus.Deleted }, whereExp);
         }
 
         /// <summary>
@@ -160,7 +160,7 @@ namespace OSS.Core.ORM.Mysql.Dapper
         /// <param name="whereSql"></param>
         /// <param name="whereParas"></param>
         /// <returns></returns>
-        protected virtual Task<Resp> SoftDelete(string whereSql , object whereParas = null)
+        protected virtual Task<Resp> SoftDelete(string whereSql, object whereParas = null)
         {
             if (string.IsNullOrEmpty(whereSql))
             {
@@ -211,7 +211,7 @@ namespace OSS.Core.ORM.Mysql.Dapper
         /// <returns></returns>
         protected Task<Resp<TType>> Get(Expression<Func<TType, bool>> whereExp)
             => ExecuteReadAsync(con => con.Get(TableName, whereExp));
-        
+
         /// <summary>
         /// 通过sql语句获取实体
         /// </summary>
@@ -240,7 +240,7 @@ namespace OSS.Core.ORM.Mysql.Dapper
         /// <param name="getSql">查询语句</param>
         /// <param name="paras">参数内容</param>
         /// <returns></returns>
-        protected Task<ListResp<TType>> GetList(string getSql,object paras)
+        protected Task<ListResp<TType>> GetList(string getSql, object paras)
         {
             return GetList<TType>(getSql, paras);
         }
@@ -271,7 +271,7 @@ namespace OSS.Core.ORM.Mysql.Dapper
         /// <param name="totalSql">查询数量语句，不需要排序,如果为空，则不计算和返回总数信息</param>
         /// <param name="paras">参数内容</param>
         /// <returns></returns>
-        protected  Task<PageListResp<TType>> GetPageList(string selectSql, object paras,
+        protected Task<PageListResp<TType>> GetPageList(string selectSql, object paras,
             string totalSql = null)
         {
             return GetPageList<TType>(selectSql, paras, totalSql);
@@ -353,10 +353,10 @@ namespace OSS.Core.ORM.Mysql.Dapper
             RType t;
             //try
             //{
-                using (var con = GetDbConnection(isWrite))
-                {
-                    t = await func(con);
-                }
+            using (var con = GetDbConnection(isWrite))
+            {
+                t = await func(con);
+            }
             //}
             //catch (Exception e)
             //{
@@ -371,7 +371,7 @@ namespace OSS.Core.ORM.Mysql.Dapper
             //    };
             //}
 
-            return t ?? new RType() {ret = (int) RespTypes.ObjectNull, msg = "未发现对应结果"};
+            return t ?? new RType() { ret = (int)RespTypes.ObjectNull, msg = "未发现对应结果" };
         }
 
         #endregion

@@ -17,7 +17,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 
-namespace OSS.Core.ORM.Mysql.Dapper.OrmExtension
+namespace OSS.Core.ORM.Dapper.OrmExtension
 {
     public class SqlExpressionVisitor
     {
@@ -200,15 +200,15 @@ namespace OSS.Core.ORM.Mysql.Dapper.OrmExtension
             if (flag.is_right)
             {
                 var paraName = GetCustomParaName(flag.para_pretoken); // flag.GetCustomParaName();
-                flag.Append(paraName,true);
+                flag.Append(paraName, true);
 
                 if (c.Type.IsEnum)
                 {
-                    AddParameter(paraName, (int) c.Value);
+                    AddParameter(paraName, (int)c.Value);
                 }
                 else if (c.Type == typeof(bool))
                 {
-                    AddParameter(paraName, (bool) value ? 1 : 0);
+                    AddParameter(paraName, (bool)value ? 1 : 0);
                 }
                 else
                     AddParameter(paraName, value);
@@ -271,7 +271,7 @@ namespace OSS.Core.ORM.Mysql.Dapper.OrmExtension
                         Visit(doesNotEqualNull, flag);
                     }
                     else
-                        flag.Append(flag.GetColName(exp.Member.Name),true);
+                        flag.Append(flag.GetColName(exp.Member.Name), true);
                 }
             }
             else
