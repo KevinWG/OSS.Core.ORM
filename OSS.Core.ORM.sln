@@ -17,6 +17,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SqlServer", "SqlServer", "{
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OSS.Core.ORM.SqlServer.Dapper", "SqlServer\OSS.Core.ORM.SqlServer.Dapper\OSS.Core.ORM.SqlServer.Dapper.csproj", "{B4CFDD54-1ADB-46BD-95CB-88B4D840E635}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Base", "Base", "{0B310E55-8D50-4963-914F-E960B5DC6F09}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OSS.Core.ORM.DapperBase", "Base\OSS.Core.ORM.DapperBase\OSS.Core.ORM.DapperBase.csproj", "{E7D5B74A-4DCB-4B79-ABA7-A05D93E9FA34}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +43,10 @@ Global
 		{B4CFDD54-1ADB-46BD-95CB-88B4D840E635}.Debug|Any CPU.Build.0 = Release|Any CPU
 		{B4CFDD54-1ADB-46BD-95CB-88B4D840E635}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B4CFDD54-1ADB-46BD-95CB-88B4D840E635}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E7D5B74A-4DCB-4B79-ABA7-A05D93E9FA34}.Debug|Any CPU.ActiveCfg = Release|Any CPU
+		{E7D5B74A-4DCB-4B79-ABA7-A05D93E9FA34}.Debug|Any CPU.Build.0 = Release|Any CPU
+		{E7D5B74A-4DCB-4B79-ABA7-A05D93E9FA34}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E7D5B74A-4DCB-4B79-ABA7-A05D93E9FA34}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -47,6 +55,7 @@ Global
 		{FE02FC37-2450-408C-ACCF-7770D15A7A97} = {613C275E-D67A-4445-B9D0-75BF25BFE0AD}
 		{0C5E73CC-E658-44A2-8B80-FD141796E40A} = {54AA522C-B300-4BAD-852B-3241E8F1F7B9}
 		{B4CFDD54-1ADB-46BD-95CB-88B4D840E635} = {30623BB9-97FF-4C55-A7BB-C46AB40A1AD1}
+		{E7D5B74A-4DCB-4B79-ABA7-A05D93E9FA34} = {0B310E55-8D50-4963-914F-E960B5DC6F09}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3DDD9D4B-07C1-4244-A5D2-9FD55AA62E25}

@@ -181,18 +181,26 @@ namespace OSS.Core.ORM.Pgsql.Dapper
         #endregion
 
         #region Get
-
         /// <summary>
         /// 通过id获取实体
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public virtual Task<Resp<TType>> GetById(string id)
+        public Task<Resp<TType>> GetById(string id)
         {
-            var sql     = string.Concat("select * from ", TableName, " WHERE id=@id");
+            return GetById<TType>(id);
+        }
+        /// <summary>
+        /// 通过id获取实体
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public virtual Task<Resp<RType>> GetById<RType>(string id)
+        {
+            var sql = string.Concat("select * from ", TableName, " WHERE id=@id");
             var dirPara = new Dictionary<string, object> { { "@id", id } };
 
-            return Get<TType>(sql, dirPara);
+            return Get<RType>(sql, dirPara);
         }
 
         /// <summary>

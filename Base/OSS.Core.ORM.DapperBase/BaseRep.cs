@@ -18,19 +18,18 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Dapper;
-using Microsoft.Data.SqlClient;
 using OSS.Common.BasicImpls;
 using OSS.Common.BasicMos;
 using OSS.Common.BasicMos.Enums;
 using OSS.Common.BasicMos.Resp;
-using OSS.Core.ORM.SqlServer.Dapper.OrmExtension;
+using OSS.Core.ORM.Mysql.Dapper.OrmExtension;
 
-namespace OSS.Core.ORM.SqlServer.Dapper
+namespace OSS.Core.ORM.Mysql.Dapper
 {
     /// <summary>
     /// 仓储层基类
     /// </summary>
-    public abstract class BaseSqlServerRep<TRep, TType, IdType> : SingleInstance<TRep>
+    public abstract class BaseRep<TRep, TType, IdType> : SingleInstance<TRep>
         where TRep : class, new()
         where TType : BaseMo<IdType>, new()
     {
@@ -50,7 +49,7 @@ namespace OSS.Core.ORM.SqlServer.Dapper
         /// 获取数据库连接
         /// </summary>
         /// <returns></returns>
-        protected abstract SqlConnection GetDbConnection(bool isWriteOperate);
+        protected abstract IDbConnection GetDbConnection(bool isWriteOperate);
 
         #region Add
 
@@ -122,12 +121,12 @@ namespace OSS.Core.ORM.SqlServer.Dapper
         /// <param name="para"></param>
         /// <returns></returns>
         protected virtual Task<Resp> Update(string updateColNamesSql, string whereSql, object para = null)
-            => ExecuteWriteAsync(async con =>
-            {
-                var sql = string.Concat("UPDATE ", TableName, " SET ", updateColNamesSql," ", whereSql);
-                var row = await con.ExecuteAsync(sql, para);
-                return row > 0 ? new Resp() : new Resp().WithResp(ret: RespTypes.OperateFailed, "更新失败");
-            });
+        => ExecuteWriteAsync(async con =>
+        {
+            var sql = string.Concat("UPDATE ", TableName, " SET ", updateColNamesSql, " ", whereSql);
+            var row = await con.ExecuteAsync(sql, para);
+            return row > 0 ? new Resp() : new Resp().WithResp(ret: RespTypes.OperateFailed, "更新失败");
+        });
 
         #endregion
 
@@ -180,6 +179,8 @@ namespace OSS.Core.ORM.SqlServer.Dapper
         #endregion
 
         #region Get
+
+
         /// <summary>
         /// 通过id获取实体
         /// </summary>
@@ -201,6 +202,7 @@ namespace OSS.Core.ORM.SqlServer.Dapper
 
             return Get<RType>(sql, dirPara);
         }
+
 
         /// <summary>
         ///  获取单个实体对象
@@ -295,9 +297,6 @@ namespace OSS.Core.ORM.SqlServer.Dapper
                 }
 
                 var list = await con.QueryAsync<RType>(selectSql, paras);
-                if(list==null|| list.Count()==0)
-                    return new PageListResp<RType>().WithResp(RespTypes.ObjectNull, "没有查到相关信息！");
-
                 return new PageListResp<RType>(total, list.ToList());
             });
         }

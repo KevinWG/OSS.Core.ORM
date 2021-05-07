@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>OSSCore</Authors>
+    <Company>OSSCore</Company>
+    <Description>Dapper表达式简单扩展</Description>
+    <PackageProjectUrl>https://github.com/KevinWG/OSS.Core.ORM</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/KevinWG/OSS.Core.ORM/</RepositoryUrl>
+    <PackageIcon>logo.png</PackageIcon>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>./bin/OSS.Core.ORM.DapperBase.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Dapper" Version="2.0.90" />
+    <PackageReference Include="OSS.Common" Version="2.3.2.17" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\logo.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
+</Project>
