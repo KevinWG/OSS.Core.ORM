@@ -186,16 +186,17 @@ namespace OSS.Core.ORM.Dapper
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public Task<Resp<TType>> GetById(string id)
+        public virtual Task<Resp<TType>> GetById(string id)
         {
             return GetById<TType>(id);
         }
+
         /// <summary>
         /// 通过id获取实体
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public virtual Task<Resp<RType>> GetById<RType>(string id)
+        protected virtual Task<Resp<RType>> GetById<RType>(string id)
         {
             var sql = string.Concat("select * from ", TableName, " WHERE id=@id");
             var dirPara = new Dictionary<string, object> { { "@id", id } };
