@@ -8,7 +8,7 @@
     <PackageProjectUrl>https://github.com/KevinWG/OSS.Core.ORM</PackageProjectUrl>
     <RepositoryUrl>https://github.com/KevinWG/OSS.Core.ORM/</RepositoryUrl>
     <PackageIcon>logo.png</PackageIcon>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

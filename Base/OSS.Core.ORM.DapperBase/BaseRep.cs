@@ -137,7 +137,7 @@ namespace OSS.Core.ORM.Dapper
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public virtual Task<Resp> SoftDeleteById(string id)
+        public virtual Task<Resp> SoftDeleteById(IdType id)
         {
             var whereSql = "id=@id";
             var dirPara = new { id };
@@ -186,7 +186,7 @@ namespace OSS.Core.ORM.Dapper
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public virtual Task<Resp<TType>> GetById(string id)
+        public virtual Task<Resp<TType>> GetById(IdType id)
         {
             return GetById<TType>(id);
         }
@@ -196,7 +196,7 @@ namespace OSS.Core.ORM.Dapper
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        protected virtual Task<Resp<RType>> GetById<RType>(string id)
+        protected virtual Task<Resp<RType>> GetById<RType>(IdType id)
         {
             var sql = string.Concat("select * from ", TableName, " WHERE id=@id");
             var dirPara = new Dictionary<string, object> { { "@id", id } };
