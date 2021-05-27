@@ -112,40 +112,48 @@ namespace OSS.Core.ORM.Dapper.OrmExtension
         /// <summary>
         ///  获取单项扩展
         /// </summary>
-        /// <typeparam name="TType"></typeparam>
+        /// <typeparam name="PType"></typeparam>
+        /// <typeparam name="RType"></typeparam>
         /// <param name="con"></param>
         /// <param name="whereExp"></param>
         /// <param name="tableName"></param>
         /// <returns></returns>
-        public static async Task<TType> Get<TType>(this IDbConnection con, string tableName, Expression<Func<TType, bool>> whereExp)
+        public static async Task<RType> Get<PType, RType>(this IDbConnection con, string tableName,
+            Expression<Func<PType, bool>> whereExp)
+            where PType : class
         {
             if (string.IsNullOrEmpty(tableName))
-                tableName = typeof(TType).Name;
+                tableName = typeof(PType).Name;
 
             var sqlVisitor = new SqlExpressionVisitor();
-            var whereSql = GetVisitExpressSql(sqlVisitor, whereExp, SqlVistorType.Where);
+            var whereSql   = GetVisitExpressSql(sqlVisitor, whereExp, SqlVistorType.Where);
 
             var sqlStr = string.Concat("SELECT * FROM ", tableName, whereSql);
-            var paras = GetExecuteParas(null, sqlVisitor);
+            var paras  = GetExecuteParas(null, sqlVisitor);
 
-            return await con.QuerySingleOrDefaultAsync<TType>(sqlStr, paras);
+            return await con.QuerySingleOrDefaultAsync<RType>(sqlStr, paras);
         }
-        public static async Task<ListResp<TType>> GetList<TType>(this IDbConnection con, string tableName, Expression<Func<TType, bool>> whereExp)
+
+
+
+        public static async Task<ListResp<RType>> GetList<PType, RType>(this IDbConnection con, string tableName,
+            Expression<Func<PType, bool>> whereExp)
+            where PType : class
         {
             if (string.IsNullOrEmpty(tableName))
-                tableName = typeof(TType).Name;
+                tableName = typeof(PType).Name;
 
             var sqlVisitor = new SqlExpressionVisitor();
-            var whereSql = GetVisitExpressSql(sqlVisitor, whereExp, SqlVistorType.Where);
+            var whereSql   = GetVisitExpressSql(sqlVisitor, whereExp, SqlVistorType.Where);
 
             var sqlStr = string.Concat("SELECT * FROM ", tableName, whereSql);
-            var paras = GetExecuteParas(null, sqlVisitor);
+            var paras  = GetExecuteParas(null, sqlVisitor);
 
-            var listRes = (await con.QueryAsync<TType>(sqlStr, paras)).ToList();
+            var listRes = (await con.QueryAsync<RType>(sqlStr, paras)).ToList();
 
             return listRes.Count == 0
-                ? new ListResp<TType>().WithResp(RespTypes.ObjectNull, "没有查到相关信息！")
-                : new ListResp<TType>(listRes.ToList());
+                ? new ListResp<RType>().WithResp(RespTypes.ObjectNull, "没有查到相关信息！")
+                : new ListResp<RType>(listRes.ToList());
         }
 
         /// <summary>

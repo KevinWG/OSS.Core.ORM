@@ -4,6 +4,10 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
 
     <IsPackable>false</IsPackable>
+
+    <Version>1.1</Version>
+
+    <PackageReleaseNotes>添加扩展方法</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,11 +15,12 @@
     <PackageReference Include="MSTest.TestAdapter" Version="2.1.0" />
     <PackageReference Include="MSTest.TestFramework" Version="2.1.0" />
     <PackageReference Include="coverlet.collector" Version="1.2.0" />
+    <PackageReference Include="MySql.Data" Version="8.0.25" />
+    <PackageReference Include="Npgsql" Version="5.0.5" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Mysql\OSS.Core.ORM.Mysql.Dapper\OSS.Core.ORM.Mysql.Dapper.csproj" />
-    <ProjectReference Include="..\..\Pgsql\OSS.Core.ORM.Pgsql.Dapper\OSS.Core.ORM.Pgsql.Dapper.csproj" />
+    <ProjectReference Include="..\..\Base\OSS.Core.ORM.DapperBase\OSS.Core.ORM.Dapper.csproj" />
   </ItemGroup>
 
 </Project>

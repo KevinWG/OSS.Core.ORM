@@ -8,7 +8,8 @@
     <PackageProjectUrl>https://github.com/KevinWG/OSS.Core.ORM</PackageProjectUrl>
     <RepositoryUrl>https://github.com/KevinWG/OSS.Core.ORM/</RepositoryUrl>
     <PackageIcon>logo.png</PackageIcon>
-    <Version>1.0.2</Version>
+    <Version>1.1</Version>
+    <PackageReleaseNotes>扩展获取泛型方法</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

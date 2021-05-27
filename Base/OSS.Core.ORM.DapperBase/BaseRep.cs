@@ -91,7 +91,7 @@ namespace OSS.Core.ORM.Dapper
 
         #endregion
 
-        #region Update 
+        #region Update
 
         /// <summary>
         /// 部分字段的更新
@@ -121,12 +121,12 @@ namespace OSS.Core.ORM.Dapper
         /// <param name="para"></param>
         /// <returns></returns>
         protected virtual Task<Resp> Update(string updateColNamesSql, string whereSql, object para = null)
-        => ExecuteWriteAsync(async con =>
-        {
-            var sql = string.Concat("UPDATE ", TableName, " SET ", updateColNamesSql, " ", whereSql);
-            var row = await con.ExecuteAsync(sql, para);
-            return row > 0 ? new Resp() : new Resp().WithResp(ret: RespTypes.OperateFailed, "更新失败");
-        });
+            => ExecuteWriteAsync(async con =>
+            {
+                var sql = string.Concat("UPDATE ", TableName, " SET ", updateColNamesSql, " ", whereSql);
+                var row = await con.ExecuteAsync(sql, para);
+                return row > 0 ? new Resp() : new Resp().WithResp(ret: RespTypes.OperateFailed, "更新失败");
+            });
 
         #endregion
 
@@ -140,7 +140,7 @@ namespace OSS.Core.ORM.Dapper
         public virtual Task<Resp> SoftDeleteById(IdType id)
         {
             var whereSql = "id=@id";
-            var dirPara = new { id };
+            var dirPara  = new {id};
             return SoftDelete(whereSql, dirPara);
         }
 
@@ -151,7 +151,7 @@ namespace OSS.Core.ORM.Dapper
         /// <returns></returns>
         protected virtual Task<Resp> SoftDelete(Expression<Func<TType, bool>> whereExp)
         {
-            return Update(m => new { status = CommonStatus.Deleted }, whereExp);
+            return Update(m => new {status = CommonStatus.Deleted}, whereExp);
         }
 
         /// <summary>
@@ -166,9 +166,10 @@ namespace OSS.Core.ORM.Dapper
             {
                 return Task.FromResult(new Resp(RespTypes.ParaError, "where语句不能为空！"));
             }
+
             return ExecuteWriteAsync(async con =>
             {
-                var sql = $"UPDATE {TableName} SET status={(int)CommonStatus.Deleted} WHERE {whereSql}";
+                var sql = $"UPDATE {TableName} SET status={(int) CommonStatus.Deleted} WHERE {whereSql}";
 
                 var rows = await con.ExecuteAsync(sql, whereParas);
                 return rows > 0 ? new Resp() : new Resp().WithResp(RespTypes.OperateFailed, "soft delete Failed!");
@@ -198,12 +199,11 @@ namespace OSS.Core.ORM.Dapper
         /// <returns></returns>
         protected virtual Task<Resp<RType>> GetById<RType>(IdType id)
         {
-            var sql = string.Concat("select * from ", TableName, " WHERE id=@id");
-            var dirPara = new Dictionary<string, object> { { "@id", id } };
+            var sql     = string.Concat("select * from ", TableName, " WHERE id=@id");
+            var dirPara = new Dictionary<string, object> {{"@id", id}};
 
             return Get<RType>(sql, dirPara);
         }
-
 
         /// <summary>
         ///  获取单个实体对象
@@ -211,7 +211,16 @@ namespace OSS.Core.ORM.Dapper
         /// <param name="whereExp">判断条件，如果为空默认根据Id判断</param>
         /// <returns></returns>
         protected Task<Resp<TType>> Get(Expression<Func<TType, bool>> whereExp)
-            => ExecuteReadAsync(con => con.Get(TableName, whereExp));
+            => ExecuteReadAsync(con => con.Get<TType, TType>(TableName, whereExp));
+
+
+        /// <summary>
+        ///  获取单个实体对象
+        /// </summary>
+        /// <param name="whereExp">判断条件，如果为空默认根据Id判断</param>
+        /// <returns></returns>
+        protected Task<Resp<RType>> Get<RType>(Expression<Func<TType, bool>> whereExp)
+            => ExecuteReadAsync(con => con.Get<TType, RType>(TableName, whereExp));
 
         /// <summary>
         /// 通过sql语句获取实体
@@ -223,6 +232,7 @@ namespace OSS.Core.ORM.Dapper
         {
             return ExecuteReadAsync(con => con.QuerySingleOrDefaultAsync<RType>(getSql, para));
         }
+
         #endregion
 
         #region Get（Page）List
@@ -233,7 +243,15 @@ namespace OSS.Core.ORM.Dapper
         /// <param name="whereExp"></param>
         /// <returns></returns>
         protected virtual Task<ListResp<TType>> GetList(Expression<Func<TType, bool>> whereExp)
-            => ExecuteReadSubAsync(con => con.GetList(TableName, whereExp));
+            => ExecuteReadSubAsync(con => con.GetList<TType, TType>(TableName, whereExp));
+
+        /// <summary>
+        ///   列表查询
+        /// </summary>
+        /// <param name="whereExp"></param>
+        /// <returns></returns>
+        protected virtual Task<ListResp<RType>> GetList<RType>(Expression<Func<TType, bool>> whereExp)
+            => ExecuteReadSubAsync(con => con.GetList<TType, RType>(TableName, whereExp));
 
         /// <summary>
         ///   列表查询
@@ -265,6 +283,8 @@ namespace OSS.Core.ORM.Dapper
             });
         }
 
+
+
         /// <summary>
         ///   列表查询
         /// </summary>
@@ -277,6 +297,7 @@ namespace OSS.Core.ORM.Dapper
         {
             return GetPageList<TType>(selectSql, paras, totalSql);
         }
+
         /// <summary>
         ///   列表查询
         /// </summary>
@@ -372,13 +393,12 @@ namespace OSS.Core.ORM.Dapper
             //    };
             //}
 
-            return t ?? new RType() { ret = (int)RespTypes.ObjectNull, msg = "未发现对应结果" };
+            return t ?? new RType() {ret = (int) RespTypes.ObjectNull, msg = "未发现对应结果"};
         }
 
         #endregion
 
     }
-
 }
 
 

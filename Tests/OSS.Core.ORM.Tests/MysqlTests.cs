@@ -1,14 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MySql.Data.MySqlClient;
-using Npgsql;
 using OSS.Common.BasicMos.Resp;
 using OSS.Common.Helpers;
-using OSS.Core.ORM.Mysql.Dapper;
-using OSS.Core.ORM.Mysql.Dapper.OrmExtension;
+using OSS.Core.ORM.Dapper;
+using OSS.Core.ORM.Dapper.OrmExtension;
 
 namespace OSS.Core.ORM.Tests
 {
@@ -29,37 +29,38 @@ namespace OSS.Core.ORM.Tests
             var sql = updateFlag.sql;
             Assert.IsTrue(paras.Count>0);
         }
+
+
         [TestMethod]
-        public void Test1()
+        public async Task Test1()
         {
+            var id = NumHelper.SnowNum();
+
             var userList = new List<UserInfo>();
             for (int i = 0; i < 3; i++)
             {
-                var id = NumHelper.SnowNum().ToString();
-
+                id += i;
                 userList.Add(new UserInfo()
                 {
-                    id = id,
+                    id   = id,
                     name = $"test_name_{id}"
                 });
             }
 
-            var addRes = MysqlUserInfoRep.Instance.AddList(userList).Result;
+            var addRes = await MysqlUserInfoRep.Instance.AddList(userList);
             Assert.IsTrue(addRes.IsSuccess());
 
-            //var updateRes = MysqlUserInfoRep.Instance.UpdateName(id,$"test_update_name{id}").Result;
-            //Assert.IsTrue(updateRes.IsSuccess());
+            var updateRes = await MysqlUserInfoRep.Instance.UpdateName(id, $"test_update_name{id}");
+            Assert.IsTrue(updateRes.IsSuccess());
 
 
-            //var getRes = MysqlUserInfoRep.Instance.Get(id).Result;
-            //Assert.IsTrue(getRes.IsSuccess());
-
-            //var getListRes = UserInfoRep.Instance.GetList().Result;
-            //Assert.True(getListRes.IsSuccess());
+            var getRes = await MysqlUserInfoRep.Instance.Get(id);
+            Assert.IsTrue(getRes.IsSuccess());
+            
         }
     }
 
-    public class MysqlUserInfoRep : BaseMysqlRep<MysqlUserInfoRep, UserInfo, string>
+    public class MysqlUserInfoRep : BaseRep<MysqlUserInfoRep, UserInfo, long>
     {
         protected string _connectStr ;
     
@@ -67,17 +68,17 @@ namespace OSS.Core.ORM.Tests
         {     
             _connectStr = "server=127.0.0.1;database=test_database;uid=root;pwd=123456;"; 
         }
-
-
-        public async Task<Resp> UpdateName(string id, string name)
+        
+        public async Task<Resp> UpdateName(long id, string name)
         {
             var teU = new UserInfo() { id = id, name = name };
-            return await Update(u => new { user_name = teU.name }, u => u.id == id);
-        }
 
-        public async Task<Resp> Get(string id)
+            return await Update(u => new { name = teU.name }, u => u.id == id);
+        }
+        
+        public async Task<Resp<UserBigInfo>> Get(long id)
         {
-            return await Get(u => u.id == id);
+            return await Get<UserBigInfo>(u => u.id == id);
         }
 
 
@@ -86,9 +87,15 @@ namespace OSS.Core.ORM.Tests
             return "user_info";
         }
 
-        protected override MySqlConnection GetDbConnection(bool isWriteOperate)
+        protected override IDbConnection GetDbConnection(bool isWriteOperate)
         {
             return new MySqlConnection(_connectStr);
+        }
+
+
+        public Task<ListResp<UserBigInfo>> GetList()
+        {
+            return GetList<UserBigInfo>(w => w.id > 0);
         }
     }
 
