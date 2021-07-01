@@ -330,6 +330,21 @@ namespace OSS.Core.ORM.Dapper
         /// <summary>
         /// 执行写数据库操作
         /// </summary>
+        /// <param name="sql"></param>
+        /// <param name="paras"></param>
+        /// <returns></returns>
+        protected Task<Resp> ExecuteWriteAsync(string sql, object paras)
+        {
+            return ExecuteWriteAsync(async con =>
+            {
+                var rows = await con.ExecuteAsync(sql, paras);
+                return rows > 0 ? new Resp() : new Resp(RespTypes.OperateFailed, "未能执行成功！");
+            });
+        }
+
+        /// <summary>
+        /// 执行写数据库操作
+        /// </summary>
         /// <typeparam name="RespType"></typeparam>
         /// <param name="func"></param>
         /// <returns></returns>
